@@ -1,0 +1,52 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.2.3'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+    }
+}
+
+//task install(type: Copy) {
+//    dependsOn build
+//    from configurations.runtime
+//    from jar
+//    into "${project.projectDir}/target/mvn-repo/com/reversecoder/javamail/javamail/"
+//}
+//
+//task initConfig(type: Copy) {
+////    from('src/main/config') {
+////        include '**/*.properties'
+////        include '**/*.xml'
+////        filter(ReplaceTokens, tokens: [version: '2.3.1'])
+////    }
+////    from('src/main/config') {
+////        exclude '**/*.properties', '**/*.xml'
+////    }
+////    from('src/main/languages') {
+////        rename 'EN_US_(.*)', '$1'
+////    }
+//    from "${project.projectDir}/rcjavamail/build/libs/"
+//    into "${project.projectDir}/target/mvn-repo/com/reversecoder/javamail/javamail/1.0-SNAPSHOT/"
+////    exclude '**/*.bak'
+//
+////    includeEmptyDirs = false
+////
+////    with dataContent
+//}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}

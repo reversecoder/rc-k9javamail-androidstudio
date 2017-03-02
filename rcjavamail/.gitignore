@@ -20,7 +20,6 @@ build/
 gradle
 androidTest/
 test/
-target/
 gradlew
 gradlew.bat
 gradle.properties
