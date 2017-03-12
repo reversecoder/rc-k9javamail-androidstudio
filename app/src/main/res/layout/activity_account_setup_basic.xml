@@ -42,13 +42,13 @@
                 android:layout_width="fill_parent"
                 android:text="@string/account_setup_basics_show_password" />
 
-            <com.reversecoder.javamail.androidstudio.view.ClientCertificateSpinner
+            <com.reversecoder.javamail.androidstudio.k9.view.ClientCertificateSpinner
                 android:id="@+id/account_client_certificate_spinner"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone" />
 
-            <com.reversecoder.javamail.androidstudio.view.FoldableLinearLayout
+            <com.reversecoder.javamail.androidstudio.k9.view.FoldableLinearLayout
                 android:id="@+id/foldable_advanced_options"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -61,7 +61,7 @@
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/account_setup_basics_client_certificate" />
-            </com.reversecoder.javamail.androidstudio.view.FoldableLinearLayout>
+            </com.reversecoder.javamail.androidstudio.k9.view.FoldableLinearLayout>
 
             <View
                 android:layout_width="fill_parent"
