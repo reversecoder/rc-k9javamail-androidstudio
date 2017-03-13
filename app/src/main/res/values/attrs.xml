@@ -40,23 +40,23 @@
         <attr name="textColorPrimaryRecipientDropdown" format="reference" />
         <attr name="textColorSecondaryRecipientDropdown" format="reference" />
         <attr name="backgroundColorChooseAccountHeader" format="color" />
-        <attr name="messageListSelectedBackgroundColor" format="reference|color"/>
-        <attr name="messageListReadItemBackgroundColor" format="reference|color"/>
-        <attr name="messageListUnreadItemBackgroundColor" format="reference|color"/>
-        <attr name="messageListThreadCountForegroundColor" format="reference|color"/>
-        <attr name="messageListThreadCountBackground" format="reference|color"/>
-        <attr name="messageListActiveItemBackgroundColor" format="reference|color"/>
-        <attr name="messageListDividerColor" format="reference|color"/>
-        <attr name="messageListCheckbox" format="reference"/>
-        <attr name="messageViewBackgroundColor" format="reference|color"/>
-        <attr name="messageViewAttachmentBackground" format="reference"/>
-        <attr name="messageComposeAddContactImage" format="reference"/>
-        <attr name="composerBackgroundColor" format="color"/>
-        <attr name="contactPictureFallbackDefaultBackgroundColor" format="reference|color"/>
-        <attr name="contactTokenBackgroundColor" format="reference|color"/>
-        <attr name="tintColorBulletPointPositive" format="reference|color"/>
-        <attr name="tintColorBulletPointNeutral" format="reference|color"/>
-        <attr name="tintColorBulletPointNegative" format="reference|color"/>
+        <attr name="messageListSelectedBackgroundColor" format="reference|color" />
+        <attr name="messageListReadItemBackgroundColor" format="reference|color" />
+        <attr name="messageListUnreadItemBackgroundColor" format="reference|color" />
+        <attr name="messageListThreadCountForegroundColor" format="reference|color" />
+        <attr name="messageListThreadCountBackground" format="reference|color" />
+        <attr name="messageListActiveItemBackgroundColor" format="reference|color" />
+        <attr name="messageListDividerColor" format="reference|color" />
+        <attr name="messageListCheckbox" format="reference" />
+        <attr name="messageViewBackgroundColor" format="reference|color" />
+        <attr name="messageViewAttachmentBackground" format="reference" />
+        <attr name="messageComposeAddContactImage" format="reference" />
+        <attr name="composerBackgroundColor" format="color" />
+        <attr name="contactPictureFallbackDefaultBackgroundColor" format="reference|color" />
+        <attr name="contactTokenBackgroundColor" format="reference|color" />
+        <attr name="tintColorBulletPointPositive" format="reference|color" />
+        <attr name="tintColorBulletPointNeutral" format="reference|color" />
+        <attr name="tintColorBulletPointNegative" format="reference|color" />
 
         <attr name="openpgp_black" format="reference|color" />
         <attr name="openpgp_orange" format="reference|color" />
@@ -67,10 +67,24 @@
         <attr name="openpgp_dark_grey" format="reference|color" />
     </declare-styleable>
 
+    <declare-styleable name="SliderPreference">
+        <attr name="android:summary" />
+    </declare-styleable>
+
     <declare-styleable name="FoldableLinearLayout">
         <attr name="foldedLabel" format="string" />
         <attr name="unFoldedLabel" format="string" />
     </declare-styleable>
 
+    <declare-styleable name="LinearViewAnimator">
+        <attr name="downInAnimation" format="reference" />
+        <attr name="downOutAnimation" format="reference" />
+        <attr name="upInAnimation" format="reference" />
+        <attr name="upOutAnimation" format="reference" />
+    </declare-styleable>
+
+    <declare-styleable name="ToolableViewAnimator">
+    <attr name="previewInitialChild" format="integer" />
+    </declare-styleable>
 
 </resources>

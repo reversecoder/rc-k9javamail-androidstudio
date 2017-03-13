@@ -34,6 +34,8 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.SeekBar;
 
+import com.reversecoder.javamail.androidstudio.R;
+
 
 /**
  * @author Jay Weisskopf

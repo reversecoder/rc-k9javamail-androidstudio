@@ -79,7 +79,7 @@ public class AccountSetupBasicActivity extends AppCompatActivity {
         mManualSetupButton = (Button)findViewById(R.id.manual_setup);
         mShowPasswordCheckBox = (CheckBox) findViewById(R.id.show_password);
     }
-
+/*
     private void onNext() {
 //        if (mClientCertificateCheckBox.isChecked()) {
 //
@@ -93,10 +93,10 @@ public class AccountSetupBasicActivity extends AppCompatActivity {
 //        String domain = emailParts[1];
         mProvider = findProviderForDomain(getDomainFromEmailAddress(mEmailView.getText().toString()));
         if (mProvider == null) {
-            /*
+            *//*
              * We don't have default settings for this account, start the manual
              * setup process.
-             */
+             *//*
             onManualSetup();
             return;
         }
@@ -148,7 +148,7 @@ public class AccountSetupBasicActivity extends AppCompatActivity {
         AccountSetupAccountType.actionSelectAccountType(this, mAccount, false);
 
         finish();
-    }
+    }*/
 
     private String getOwnerName() {
         String name = null;

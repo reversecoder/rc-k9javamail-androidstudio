@@ -4,6 +4,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.*;
+
+import com.reversecoder.javamail.androidstudio.R;
+import com.reversecoder.javamail.androidstudio.k9.FontSizes;
+import com.reversecoder.javamail.androidstudio.k9.K9;
+import com.reversecoder.javamail.androidstudio.k9.Preferences;
 import com.reversecoder.javamail.androidstudio.k9.activity.K9PreferenceActivity;
 import com.reversecoder.javamail.androidstudio.k9.preferences.Storage;
 import com.reversecoder.javamail.androidstudio.k9.preferences.StorageEditor;
