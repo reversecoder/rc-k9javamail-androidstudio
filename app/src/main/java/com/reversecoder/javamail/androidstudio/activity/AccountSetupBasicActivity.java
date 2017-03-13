@@ -1,10 +1,17 @@
 package com.reversecoder.javamail.androidstudio.activity;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.XmlResourceParser;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -18,26 +25,37 @@ import com.fsck.k9.mail.Transport;
 import com.fsck.k9.mail.store.RemoteStore;
 import com.reversecoder.javamail.androidstudio.R;
 import com.reversecoder.javamail.androidstudio.k9.Account;
+import com.reversecoder.javamail.androidstudio.k9.CheckDirection;
+import com.reversecoder.javamail.androidstudio.k9.EmailAddressValidator;
+import com.reversecoder.javamail.androidstudio.k9.K9;
 import com.reversecoder.javamail.androidstudio.k9.Preferences;
-import com.reversecoder.javamail.androidstudio.k9.activity.setup.AccountSetupAccountType;
-import com.reversecoder.javamail.androidstudio.k9.view.ClientCertificateSpinner;
+import com.reversecoder.javamail.androidstudio.k9.account.AccountCreator;
+import com.reversecoder.javamail.androidstudio.k9.activity.setup.AccountSetupNames;
+import com.reversecoder.javamail.androidstudio.k9.helper.UrlEncodingHelper;
+import com.reversecoder.javamail.androidstudio.k9.helper.Utility;
 
 import java.io.Serializable;
 import java.net.URI;
-import java.util.regex.Pattern;
+import java.net.URISyntaxException;
+import java.util.Locale;
 
 public class AccountSetupBasicActivity extends AppCompatActivity {
-
+    private final static String EXTRA_ACCOUNT = "com.fsck.k9.AccountSetupBasics.account";
+    private final static String STATE_KEY_PROVIDER =
+            "com.fsck.k9.AccountSetupBasics.provider";
+    private final static String STATE_KEY_CHECKED_INCOMING =
+            "com.fsck.k9.AccountSetupBasics.checkedIncoming";
+    private final static int DIALOG_NOTE = 1;
     private EditText mEmailView;
     private EditText mPasswordView;
-    private CheckBox mClientCertificateCheckBox;
-    private ClientCertificateSpinner mClientCertificateSpinner;
     private Button mNextButton;
     private Button mManualSetupButton;
     private Provider mProvider;
     private CheckBox mShowPasswordCheckBox;
-
     private Account mAccount;
+    private EmailAddressValidator mEmailValidator = new EmailAddressValidator();
+    private boolean mCheckedIncoming = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,55 +66,192 @@ public class AccountSetupBasicActivity extends AppCompatActivity {
         initActions();
     }
 
-    private void initActions(){
+    private void initActions() {
         mShowPasswordCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 showPassword(isChecked);
             }
         });
+        mNextButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onNext();
+            }
+        });
+
     }
 
-    public boolean isValidAddressOnly(CharSequence text) {
-        Pattern EMAIL_ADDRESS_PATTERN = Pattern.compile(
-                "[a-zA-Z0-9\\+\\.\\_\\%\\-\\+]{1,256}" +
-                        "\\@" +
-                        "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}" +
-                        "(" +
-                        "\\." +
-                        "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
-                        ")+"
-        );
-        return EMAIL_ADDRESS_PATTERN.matcher(text).matches();
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (mAccount != null) {
+            outState.putString(EXTRA_ACCOUNT, mAccount.getUuid());
+        }
+        if (mProvider != null) {
+            outState.putSerializable(STATE_KEY_PROVIDER, mProvider);
+        }
+        outState.putBoolean(STATE_KEY_CHECKED_INCOMING, mCheckedIncoming);
     }
 
-    private void initUI(){
-        mEmailView = (EditText)findViewById(R.id.account_email);
-        mPasswordView = (EditText)findViewById(R.id.account_password);
-        mClientCertificateCheckBox = (CheckBox)findViewById(R.id.account_client_certificate);
-        mClientCertificateSpinner = (ClientCertificateSpinner)findViewById(R.id.account_client_certificate_spinner);
-        mNextButton = (Button)findViewById(R.id.next);
-        mManualSetupButton = (Button)findViewById(R.id.manual_setup);
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        if (savedInstanceState.containsKey(EXTRA_ACCOUNT)) {
+            String accountUuid = savedInstanceState.getString(EXTRA_ACCOUNT);
+            mAccount = Preferences.getPreferences(this).getAccount(accountUuid);
+        }
+
+        if (savedInstanceState.containsKey(STATE_KEY_PROVIDER)) {
+            mProvider = (Provider) savedInstanceState.getSerializable(STATE_KEY_PROVIDER);
+        }
+
+        mCheckedIncoming = savedInstanceState.getBoolean(STATE_KEY_CHECKED_INCOMING);
+
+        updateViewVisibility();
+
+        showPassword(mShowPasswordCheckBox.isChecked());
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+
+        /*
+         * We wait until now to initialize the listeners because we didn't want
+         * the OnCheckedChangeListener active while the
+         * mClientCertificateCheckBox state was being restored because it could
+         * trigger the pop-up of a ClientCertificateSpinner.chooseCertificate()
+         * dialog.
+         */
+        initializeViewListeners();
+        validateFields();
+    }
+
+    private void initializeViewListeners() {
+        mEmailView.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                validateFields();
+            }
+        });
+        mPasswordView.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                validateFields();
+            }
+        });
+
+        mShowPasswordCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                showPassword(isChecked);
+            }
+        });
+
+    }
+
+    private void validateFields() {
+        String email = mEmailView.getText().toString();
+
+        boolean valid = Utility.requiredFieldValid(mEmailView)
+                && Utility.requiredFieldValid(mPasswordView)
+                && mEmailValidator.isValidAddressOnly(email);
+
+        mNextButton.setEnabled(valid);
+        mManualSetupButton.setEnabled(valid);
+        /*
+         * Dim the next button's icon to 50% if the button is disabled.
+         * TODO this can probably be done with a stateful drawable. Check into it.
+         * android:state_enabled
+         */
+        Utility.setCompoundDrawablesAlpha(mNextButton, mNextButton.isEnabled() ? 255 : 128);
+    }
+
+    private void updateViewVisibility() {
+        // show password fields, hide client certificate spinner
+        mPasswordView.setVisibility(View.VISIBLE);
+        mShowPasswordCheckBox.setVisibility(View.VISIBLE);
+    }
+
+    private void initUI() {
+        mEmailView = (EditText) findViewById(R.id.account_email);
+        mEmailView.setText("rashedul.alam@bjitgroup.com");
+        mPasswordView = (EditText) findViewById(R.id.account_password);
+        mNextButton = (Button) findViewById(R.id.next);
+        mManualSetupButton = (Button) findViewById(R.id.manual_setup);
+        mManualSetupButton.setVisibility(View.GONE);
         mShowPasswordCheckBox = (CheckBox) findViewById(R.id.show_password);
     }
-/*
-    private void onNext() {
-//        if (mClientCertificateCheckBox.isChecked()) {
-//
-//            // Auto-setup doesn't support client certificates.
-//            onManualSetup();
-//            return;
-//        }
 
-//        String email = mEmailView.getText().toString();
-//        String[] emailParts = splitEmail(email);
-//        String domain = emailParts[1];
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            if (!mCheckedIncoming) {
+                //We've successfully checked incoming.  Now check outgoing.
+                mCheckedIncoming = true;
+                AccountSetupCheckSettingsActivity.actionCheckSettings(this, mAccount, CheckDirection.OUTGOING);
+            } else {
+                //We've successfully checked outgoing as well.
+                mAccount.setDescription(mAccount.getEmail());
+                mAccount.save(Preferences.getPreferences(this));
+                K9.setServicesEnabled(this);
+                AccountSetupNames.actionSetNames(this, mAccount);
+                finish();
+            }
+        }
+    }
+
+    @Override
+    public Dialog onCreateDialog(int id) {
+        if (id == DIALOG_NOTE) {
+            if (mProvider != null && mProvider.note != null) {
+                return new AlertDialog.Builder(this)
+                        .setMessage(mProvider.note)
+                        .setPositiveButton(
+                                getString(R.string.okay_action),
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        finishAutoSetup();
+                                    }
+                                })
+                        .setNegativeButton(
+                                getString(R.string.cancel_action),
+                                null)
+                        .create();
+            }
+        }
+        return null;
+    }
+
+    private void onNext() {
         mProvider = findProviderForDomain(getDomainFromEmailAddress(mEmailView.getText().toString()));
         if (mProvider == null) {
-            *//*
+            /*
              * We don't have default settings for this account, start the manual
              * setup process.
-             *//*
+             */
             onManualSetup();
             return;
         }
@@ -107,6 +262,85 @@ public class AccountSetupBasicActivity extends AppCompatActivity {
             finishAutoSetup();
         }
     }
+
+    private void finishAutoSetup() {
+        String email = mEmailView.getText().toString();
+        String password = mPasswordView.getText().toString();
+        String[] emailParts = splitEmail(email);
+        String user = emailParts[0];
+        String domain = emailParts[1];
+        try {
+            String userEnc = UrlEncodingHelper.encodeUtf8(user);
+            String passwordEnc = UrlEncodingHelper.encodeUtf8(password);
+
+            String incomingUsername = mProvider.incomingUsernameTemplate;
+            incomingUsername = incomingUsername.replaceAll("\\$email", email);
+            incomingUsername = incomingUsername.replaceAll("\\$user", userEnc);
+            incomingUsername = incomingUsername.replaceAll("\\$domain", domain);
+
+            URI incomingUriTemplate = mProvider.incomingUriTemplate;
+            URI incomingUri = new URI(incomingUriTemplate.getScheme(), incomingUsername + ":" + passwordEnc,
+                    incomingUriTemplate.getHost(), incomingUriTemplate.getPort(), null, null, null);
+
+            String outgoingUsername = mProvider.outgoingUsernameTemplate;
+
+            URI outgoingUriTemplate = mProvider.outgoingUriTemplate;
+
+
+            URI outgoingUri;
+            if (outgoingUsername != null) {
+                outgoingUsername = outgoingUsername.replaceAll("\\$email", email);
+                outgoingUsername = outgoingUsername.replaceAll("\\$user", userEnc);
+                outgoingUsername = outgoingUsername.replaceAll("\\$domain", domain);
+                outgoingUri = new URI(outgoingUriTemplate.getScheme(), outgoingUsername + ":"
+                        + passwordEnc, outgoingUriTemplate.getHost(), outgoingUriTemplate.getPort(), null,
+                        null, null);
+
+            } else {
+                outgoingUri = new URI(outgoingUriTemplate.getScheme(),
+                        null, outgoingUriTemplate.getHost(), outgoingUriTemplate.getPort(), null,
+                        null, null);
+
+
+            }
+            if (mAccount == null) {
+                mAccount = Preferences.getPreferences(this).newAccount();
+            }
+            mAccount.setName(getOwnerName());
+            mAccount.setEmail(email);
+            mAccount.setStoreUri(incomingUri.toString());
+            mAccount.setTransportUri(outgoingUri.toString());
+
+            setupFolderNames(incomingUriTemplate.getHost().toLowerCase(Locale.US));
+
+            ServerSettings incomingSettings = RemoteStore.decodeStoreUri(incomingUri.toString());
+            mAccount.setDeletePolicy(AccountCreator.getDefaultDeletePolicy(incomingSettings.type));
+
+            // Check incoming here.  Then check outgoing in onActivityResult()
+            AccountSetupCheckSettingsActivity.actionCheckSettings(this, mAccount, CheckDirection.INCOMING);
+        } catch (URISyntaxException use) {
+            /*
+             * If there is some problem with the URI we give up and go on to
+             * manual setup.
+             */
+            onManualSetup();
+        }
+    }
+
+    private void setupFolderNames(String domain) {
+        mAccount.setDraftsFolderName(getString(R.string.special_mailbox_name_drafts));
+        mAccount.setTrashFolderName(getString(R.string.special_mailbox_name_trash));
+        mAccount.setSentFolderName(getString(R.string.special_mailbox_name_sent));
+        mAccount.setArchiveFolderName(getString(R.string.special_mailbox_name_archive));
+
+        // Yahoo! has a special folder for Spam, called "Bulk Mail".
+        if (domain.endsWith(".yahoo.com")) {
+            mAccount.setSpamFolderName("Bulk Mail");
+        } else {
+            mAccount.setSpamFolderName(getString(R.string.special_mailbox_name_spam));
+        }
+    }
+
     private void onManualSetup() {
         String email = mEmailView.getText().toString();
         String[] emailParts = splitEmail(email);
@@ -116,13 +350,6 @@ public class AccountSetupBasicActivity extends AppCompatActivity {
         String password = null;
         String clientCertificateAlias = null;
         AuthType authenticationType;
-//        if (mClientCertificateCheckBox.isChecked()) {
-//            authenticationType = AuthType.EXTERNAL;
-//            clientCertificateAlias = mClientCertificateSpinner.getAlias();
-//        } else {
-//            authenticationType = AuthType.PLAIN;
-//            password = mPasswordView.getText().toString();
-//        }
         authenticationType = AuthType.PLAIN;
         password = mPasswordView.getText().toString();
 
@@ -145,10 +372,10 @@ public class AccountSetupBasicActivity extends AppCompatActivity {
 
         setupFolderNames(domain);
 
-        AccountSetupAccountType.actionSelectAccountType(this, mAccount, false);
+        AccountSetupAccountTypeActivity.actionSelectAccountType(this, mAccount, false);
 
         finish();
-    }*/
+    }
 
     private String getOwnerName() {
         String name = null;
@@ -256,6 +483,7 @@ public class AccountSetupBasicActivity extends AppCompatActivity {
     /**
      * Attempts to get the given attribute as a String resource first, and if it fails
      * returns the attribute as a simple String value.
+     *
      * @param xml
      * @param name
      * @return

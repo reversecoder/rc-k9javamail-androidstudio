@@ -1,4 +1,4 @@
-package com.reversecoder.javamail.androidstudio.k9.activity.setup;
+package com.reversecoder.javamail.androidstudio.activity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -10,12 +10,19 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import timber.log.Timber;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.fsck.k9.mail.AuthenticationFailedException;
+import com.fsck.k9.mail.CertificateValidationException;
+import com.fsck.k9.mail.MessagingException;
+import com.fsck.k9.mail.Store;
+import com.fsck.k9.mail.Transport;
+import com.fsck.k9.mail.TransportProvider;
+import com.fsck.k9.mail.filter.Hex;
+import com.fsck.k9.mail.store.webdav.WebDavStore;
 import com.reversecoder.javamail.androidstudio.R;
 import com.reversecoder.javamail.androidstudio.k9.Account;
 import com.reversecoder.javamail.androidstudio.k9.CheckDirection;
@@ -25,22 +32,17 @@ import com.reversecoder.javamail.androidstudio.k9.activity.K9Activity;
 import com.reversecoder.javamail.androidstudio.k9.controller.MessagingController;
 import com.reversecoder.javamail.androidstudio.k9.fragment.ConfirmationDialogFragment;
 import com.reversecoder.javamail.androidstudio.k9.fragment.ConfirmationDialogFragment.ConfirmationDialogFragmentListener;
-import com.fsck.k9.mail.AuthenticationFailedException;
-import com.fsck.k9.mail.CertificateValidationException;
-import com.fsck.k9.mail.MessagingException;
-import com.fsck.k9.mail.Store;
-import com.fsck.k9.mail.Transport;
-import com.fsck.k9.mail.TransportProvider;
-import com.fsck.k9.mail.store.webdav.WebDavStore;
-import com.fsck.k9.mail.filter.Hex;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-import java.security.NoSuchAlgorithmException;
+
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+
+import timber.log.Timber;
 
 /**
  * Checks the given settings to make sure that they can be used to send and
@@ -49,7 +51,7 @@ import java.util.Locale;
  * XXX NOTE: The manifest for this app has it ignore config changes, because
  * it doesn't correctly deal with restarting while its thread is running.
  */
-public class AccountSetupCheckSettings extends K9Activity implements OnClickListener,
+public class AccountSetupCheckSettingsActivity extends K9Activity implements OnClickListener,
         ConfirmationDialogFragmentListener{
 
     public static final int ACTIVITY_REQUEST_CODE = 1;
@@ -79,7 +81,7 @@ public class AccountSetupCheckSettings extends K9Activity implements OnClickList
 
     public static void actionCheckSettings(Activity context, Account account,
             CheckDirection direction) {
-        Intent i = new Intent(context, AccountSetupCheckSettings.class);
+        Intent i = new Intent(context, AccountSetupCheckSettingsActivity.class);
         i.putExtra(EXTRA_ACCOUNT, account.getUuid());
         i.putExtra(EXTRA_CHECK_DIRECTION, direction);
         context.startActivityForResult(i, ACTIVITY_REQUEST_CODE);
@@ -252,7 +254,7 @@ public class AccountSetupCheckSettings extends K9Activity implements OnClickList
 
                 // TODO: refactor with DialogFragment.
                 // This is difficult because we need to pass through chain[0] for onClick()
-                new AlertDialog.Builder(AccountSetupCheckSettings.this)
+                new AlertDialog.Builder(AccountSetupCheckSettingsActivity.this)
                 .setTitle(getString(R.string.account_setup_failed_dlg_invalid_certificate_title))
                 //.setMessage(getString(R.string.account_setup_failed_dlg_invalid_certificate)
                 .setMessage(getString(msgResId, exMessage)
@@ -292,7 +294,7 @@ public class AccountSetupCheckSettings extends K9Activity implements OnClickList
                     R.string.account_setup_failed_dlg_certificate_message_fmt,
                     e.getMessage() == null ? "" : e.getMessage());
         }
-        AccountSetupCheckSettings.actionCheckSettings(AccountSetupCheckSettings.this, mAccount,
+        AccountSetupCheckSettingsActivity.actionCheckSettings(AccountSetupCheckSettingsActivity.this, mAccount,
                 mDirection);
     }
 

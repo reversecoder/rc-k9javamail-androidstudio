@@ -10,14 +10,36 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activity.AccountSetupBasicActivity">
+        <activity android:name="com.reversecoder.javamail.androidstudio.activity.AccountSetupBasicActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.MainActivity"></activity>
+
+        <activity
+            android:name="com.reversecoder.javamail.androidstudio.activity.AccountSetupAccountTypeActivity"
+            android:configChanges="locale"
+            android:label="@string/account_setup_account_type_title"/>
+
+        <activity
+            android:name="com.reversecoder.javamail.androidstudio.activity.AccountSetupIncomingActivity"
+            android:configChanges="locale"
+            android:label="@string/account_setup_incoming_title"/>
+
+        <activity
+            android:name="com.reversecoder.javamail.androidstudio.activity.AccountSetupOutgoingActivity"
+            android:configChanges="locale"
+            android:label="@string/account_setup_outgoing_title"/>
+        <!-- XXX Note: this activity is hacked to ignore config changes,
+             since it doesn't currently handle them correctly in code. -->
+        <activity
+            android:name="com.reversecoder.javamail.androidstudio.activity.AccountSetupCheckSettingsActivity"
+            android:configChanges="keyboardHidden|orientation|locale"
+            android:label="@string/account_setup_check_settings_title"/>
+
+
     </application>
 
 </manifest>

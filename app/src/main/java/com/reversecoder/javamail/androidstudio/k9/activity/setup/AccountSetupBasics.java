@@ -27,12 +27,12 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 
 import com.reversecoder.javamail.androidstudio.k9.Account;
+import com.reversecoder.javamail.androidstudio.k9.CheckDirection;
 import com.reversecoder.javamail.androidstudio.k9.EmailAddressValidator;
 import com.reversecoder.javamail.androidstudio.k9.K9;
 import com.reversecoder.javamail.androidstudio.k9.Preferences;
 import com.reversecoder.javamail.androidstudio.R;
 import com.reversecoder.javamail.androidstudio.k9.activity.K9Activity;
-import com.reversecoder.javamail.androidstudio.k9.activity.setup.AccountSetupCheckSettings.CheckDirection;
 import com.reversecoder.javamail.androidstudio.k9.helper.UrlEncodingHelper;
 import com.reversecoder.javamail.androidstudio.k9.helper.Utility;
 import com.fsck.k9.mail.AuthType;

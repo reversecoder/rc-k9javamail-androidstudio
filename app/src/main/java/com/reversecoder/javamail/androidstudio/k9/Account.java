@@ -22,7 +22,6 @@ import android.net.Uri;
 import timber.log.Timber;
 
 import com.reversecoder.javamail.androidstudio.R;
-import com.reversecoder.javamail.androidstudio.k9.activity.setup.AccountSetupCheckSettings.CheckDirection;
 import com.reversecoder.javamail.androidstudio.k9.helper.Utility;
 import com.fsck.k9.mail.Address;
 import com.fsck.k9.mail.MessagingException;

@@ -1,5 +1,5 @@
 
-package com.reversecoder.javamail.androidstudio.k9.activity.setup;
+package com.reversecoder.javamail.androidstudio.activity;
 
 import android.app.Activity;
 import android.content.Context;
@@ -8,23 +8,22 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.method.DigitsKeyListener;
-import timber.log.Timber;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.*;
+import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
 
-import com.reversecoder.javamail.androidstudio.R;
-import com.reversecoder.javamail.androidstudio.k9.Account;
-import com.reversecoder.javamail.androidstudio.k9.Account.FolderMode;
-import com.fsck.k9.mail.NetworkType;
-import com.reversecoder.javamail.androidstudio.k9.CheckDirection;
-import com.reversecoder.javamail.androidstudio.k9.Preferences;
-import com.reversecoder.javamail.androidstudio.k9.activity.K9Activity;
-import com.reversecoder.javamail.androidstudio.k9.helper.Utility;
 import com.fsck.k9.mail.AuthType;
 import com.fsck.k9.mail.ConnectionSecurity;
+import com.fsck.k9.mail.NetworkType;
 import com.fsck.k9.mail.ServerSettings;
 import com.fsck.k9.mail.ServerSettings.Type;
 import com.fsck.k9.mail.Store;
@@ -32,7 +31,18 @@ import com.fsck.k9.mail.Transport;
 import com.fsck.k9.mail.store.RemoteStore;
 import com.fsck.k9.mail.store.imap.ImapStoreSettings;
 import com.fsck.k9.mail.store.webdav.WebDavStoreSettings;
+import com.reversecoder.javamail.androidstudio.R;
+import com.reversecoder.javamail.androidstudio.k9.Account;
+import com.reversecoder.javamail.androidstudio.k9.Account.FolderMode;
+import com.reversecoder.javamail.androidstudio.k9.CheckDirection;
+import com.reversecoder.javamail.androidstudio.k9.Preferences;
 import com.reversecoder.javamail.androidstudio.k9.account.AccountCreator;
+import com.reversecoder.javamail.androidstudio.k9.activity.K9Activity;
+import com.reversecoder.javamail.androidstudio.k9.activity.setup.AuthTypeAdapter;
+import com.reversecoder.javamail.androidstudio.k9.activity.setup.AuthTypeHolder;
+import com.reversecoder.javamail.androidstudio.k9.activity.setup.ConnectionSecurityAdapter;
+import com.reversecoder.javamail.androidstudio.k9.activity.setup.ConnectionSecurityHolder;
+import com.reversecoder.javamail.androidstudio.k9.helper.Utility;
 import com.reversecoder.javamail.androidstudio.k9.service.MailService;
 import com.reversecoder.javamail.androidstudio.k9.view.ClientCertificateSpinner;
 import com.reversecoder.javamail.androidstudio.k9.view.ClientCertificateSpinner.OnClientCertificateChangedListener;
@@ -42,7 +52,9 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AccountSetupIncoming extends K9Activity implements OnClickListener {
+import timber.log.Timber;
+
+public class AccountSetupIncomingActivity extends K9Activity implements OnClickListener {
     private static final String EXTRA_ACCOUNT = "account";
     private static final String EXTRA_MAKE_DEFAULT = "makeDefault";
     private static final String STATE_SECURITY_TYPE_POSITION = "stateSecurityTypePosition";
@@ -77,7 +89,7 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
     private ConnectionSecurity[] mConnectionSecurityChoices = ConnectionSecurity.values();
 
     public static void actionIncomingSettings(Activity context, Account account, boolean makeDefault) {
-        Intent i = new Intent(context, AccountSetupIncoming.class);
+        Intent i = new Intent(context, AccountSetupIncomingActivity.class);
         i.putExtra(EXTRA_ACCOUNT, account.getUuid());
         i.putExtra(EXTRA_MAKE_DEFAULT, makeDefault);
         context.startActivity(i);
@@ -88,7 +100,7 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
     }
 
     public static Intent intentActionEditIncomingSettings(Context context, Account account) {
-        Intent i = new Intent(context, AccountSetupIncoming.class);
+        Intent i = new Intent(context, AccountSetupIncomingActivity.class);
         i.setAction(Intent.ACTION_EDIT);
         i.putExtra(EXTRA_ACCOUNT, account.getUuid());
         return i;
@@ -303,7 +315,7 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
          * Updates the port when the user changes the security type. This allows
          * us to show a reasonable default which the user can change.
          */
-        mSecurityTypeView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        mSecurityTypeView.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position,
                     long id) {
@@ -326,7 +338,7 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
             public void onNothingSelected(AdapterView<?> parent) { /* unused */ }
         });
 
-        mAuthTypeView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        mAuthTypeView.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position,
                     long id) {
@@ -533,7 +545,7 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
                 }
 
 
-                AccountSetupOutgoing.actionOutgoingSettings(this, mAccount, mMakeDefault);
+                AccountSetupOutgoingActivity.actionOutgoingSettings(this, mAccount, mMakeDefault);
                 finish();
             }
         }
@@ -584,7 +596,7 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
             mAccount.setCompression(NetworkType.OTHER, mCompressionOther.isChecked());
             mAccount.setSubscribedFoldersOnly(mSubscribedFoldersOnly.isChecked());
 
-            AccountSetupCheckSettings.actionCheckSettings(this, mAccount, CheckDirection.INCOMING);
+            AccountSetupCheckSettingsActivity.actionCheckSettings(this, mAccount, CheckDirection.INCOMING);
         } catch (Exception e) {
             failure(e);
         }

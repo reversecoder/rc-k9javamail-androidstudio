@@ -5,8 +5,8 @@ import android.content.res.Resources;
 import com.reversecoder.javamail.androidstudio.R;
 import com.fsck.k9.mail.AuthType;
 
-class AuthTypeHolder {
-    final AuthType authType;
+public class AuthTypeHolder {
+    public final AuthType authType;
     private final Resources resources;
     private boolean insecure;
 
