@@ -199,6 +199,7 @@ public class AccountSetupBasicActivity extends AppCompatActivity {
         mEmailView = (EditText) findViewById(R.id.account_email);
         mEmailView.setText("rashedul.alam@bjitgroup.com");
         mPasswordView = (EditText) findViewById(R.id.account_password);
+        mPasswordView.setText("");
         mNextButton = (Button) findViewById(R.id.next);
         mManualSetupButton = (Button) findViewById(R.id.manual_setup);
         mManualSetupButton.setVisibility(View.GONE);

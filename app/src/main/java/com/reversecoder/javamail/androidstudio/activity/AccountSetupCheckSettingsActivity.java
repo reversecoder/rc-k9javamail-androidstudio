@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ProgressBar;
@@ -108,13 +109,17 @@ public class AccountSetupCheckSettingsActivity extends K9Activity implements OnC
     private void handleCertificateValidationException(CertificateValidationException cve) {
         Timber.e(cve, "Error while testing settings");
 
+        Log.d("rc-k9javamail","In handleCertificateValidationException");
+
         X509Certificate[] chain = cve.getCertChain();
         // Avoid NullPointerException in acceptKeyDialog()
         if (chain != null) {
+            Log.d("rc-k9javamail","Preparing for acceptKeyDialog");
             acceptKeyDialog(
                     R.string.account_setup_failed_dlg_certificate_message_fmt,
                     cve);
         } else {
+            Log.d("rc-k9javamail","Preparing for showErrorDialog");
             showErrorDialog(
                     R.string.account_setup_failed_dlg_server_message_fmt,
                     errorMessageForCertificateException(cve));
@@ -134,6 +139,8 @@ public class AccountSetupCheckSettingsActivity extends K9Activity implements OnC
     }
 
     private void acceptKeyDialog(final int msgResId, final CertificateValidationException ex) {
+
+        Log.d("rc-k9javamail","In acceptKeyDialog");
         mHandler.post(new Runnable() {
             public void run() {
                 if (mDestroyed) {
@@ -265,6 +272,8 @@ public class AccountSetupCheckSettingsActivity extends K9Activity implements OnC
                     getString(R.string.account_setup_failed_dlg_invalid_certificate_accept),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
+
+                        Log.d("rc-k9javamail","Pressed accept key");
                         acceptCertificate(chain[0]);
                     }
                 })
@@ -287,9 +296,12 @@ public class AccountSetupCheckSettingsActivity extends K9Activity implements OnC
      * @param certificate
      */
     private void acceptCertificate(X509Certificate certificate) {
+        Log.d("rc-k9javamail","In acceptCertificate");
         try {
             mAccount.addCertificate(mDirection, certificate);
+            Log.d("rc-k9javamail","Certificate added to account");
         } catch (CertificateException e) {
+            Log.d("rc-k9javamail","Fail to add certificate to account");
             showErrorDialog(
                     R.string.account_setup_failed_dlg_certificate_message_fmt,
                     e.getMessage() == null ? "" : e.getMessage());
@@ -318,6 +330,7 @@ public class AccountSetupCheckSettingsActivity extends K9Activity implements OnC
     }
 
     private void showErrorDialog(final int msgResId, final Object... args) {
+        Log.d("rc-k9javamail","In showErrorDialog");
         mHandler.post(new Runnable() {
             public void run() {
                 showDialogFragment(R.id.dialog_account_setup_error, getString(msgResId, args));
@@ -423,8 +436,11 @@ public class AccountSetupCheckSettingsActivity extends K9Activity implements OnC
                 }
 
                 clearCertificateErrorNotifications(direction);
+                Log.d("rc-k9javamail","Passed clearCertificateErrorNotifications");
 
                 checkServerSettings(direction);
+
+                Log.d("rc-k9javamail","Passed checkServerSettings");
 
                 if (cancelled()) {
                     return null;
@@ -439,6 +455,7 @@ public class AccountSetupCheckSettingsActivity extends K9Activity implements OnC
                         R.string.account_setup_failed_dlg_auth_message_fmt,
                         afe.getMessage() == null ? "" : afe.getMessage());
             } catch (CertificateValidationException cve) {
+                Log.d("rc-k9javamail","In CertificateValidationException");
                 handleCertificateValidationException(cve);
             } catch (Exception e) {
                 Timber.e(e, "Error while testing settings");
@@ -467,6 +484,7 @@ public class AccountSetupCheckSettingsActivity extends K9Activity implements OnC
         private void checkServerSettings(CheckDirection direction) throws MessagingException {
             switch (direction) {
                 case INCOMING: {
+                    Log.d("rc-k9javamail: ","Preparing for checkIncoming");
                     checkIncoming();
                     break;
                 }
@@ -491,20 +509,33 @@ public class AccountSetupCheckSettingsActivity extends K9Activity implements OnC
         }
 
         private void checkIncoming() throws MessagingException {
+            Log.d("rc-k9javamail: ","In checkIncoming");
             Store store = account.getRemoteStore();
+            Log.d("rc-k9javamail: ","Got store");
             if (store instanceof WebDavStore) {
                 publishProgress(R.string.account_setup_check_settings_authenticate);
             } else {
                 publishProgress(R.string.account_setup_check_settings_check_incoming_msg);
             }
-            store.checkSettings();
+            /*
+            * Check from here
+            * */
 
+            Log.d("rc-k9javamail: ","Preparing for checkSettings");
+            if(store !=null){
+                store.checkSettings();
+                Log.d("rc-k9javamail: ","Passed checkSettings from store");
+            } else {
+                Log.d("rc-k9javamail: ","Didn't find store");
+            }
             if (store instanceof WebDavStore) {
                 publishProgress(R.string.account_setup_check_settings_fetch);
             }
-            MessagingController.getInstance(getApplication()).listFoldersSynchronous(account, true, null);
-            MessagingController.getInstance(getApplication())
-                    .synchronizeMailbox(account, account.getInboxFolderName(), null, null);
+//            MessagingController.getInstance(getApplication()).listFoldersSynchronous(account, true, null);
+//            Log.d("rc-k9javamail: ","Passed listFoldersSynchronous");
+//            MessagingController.getInstance(getApplication())
+//                    .synchronizeMailbox(account, account.getInboxFolderName(), null, null);
+//            Log.d("rc-k9javamail: ","Passed synchronizeMailbox");
         }
 
         @Override

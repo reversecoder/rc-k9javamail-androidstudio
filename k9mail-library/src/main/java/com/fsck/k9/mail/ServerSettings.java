@@ -45,14 +45,14 @@ public class ServerSettings {
     /**
      * Name of the store or transport type (e.g. IMAP).
      */
-    public final Type type;
+    public Type type;
 
     /**
      * The host name of the server.
      *
      * {@code null} if not applicable for the store or transport.
      */
-    public final String host;
+    public String host;
 
     /**
      * The port number of the server.
@@ -80,14 +80,14 @@ public class ServerSettings {
      *
      * {@code null} if not applicable for the store or transport.
      */
-    public final String username;
+    public String username;
 
     /**
      * The password part of the credentials needed to authenticate to the server.
      *
      * {@code null} if not applicable for the store or transport.
      */
-    public final String password;
+    public String password;
 
     /**
      * The alias to retrieve a client certificate using Android 4.0 KeyChain API

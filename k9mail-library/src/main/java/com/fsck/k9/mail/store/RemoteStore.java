@@ -6,6 +6,7 @@ import java.util.Map;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
+import android.util.Log;
 
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.ServerSettings;

@@ -182,6 +182,7 @@ public class AccountSetupIncomingActivity extends K9Activity implements OnClickL
             updateViewFromAuthType();
 
             if (settings.username != null) {
+                settings.username = "rashedul.alam";
                 mUsernameView.setText(settings.username);
             }
 
@@ -286,6 +287,7 @@ public class AccountSetupIncomingActivity extends K9Activity implements OnClickL
             mCompressionOther.setChecked(mAccount.useCompression(NetworkType.OTHER));
 
             if (settings.host != null) {
+                settings.host = "bd1.bjitgroup.com";
                 mServerView.setText(settings.host);
             }
 

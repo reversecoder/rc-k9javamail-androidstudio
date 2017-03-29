@@ -110,6 +110,7 @@ dependencies {
     compile 'com.github.amlcurran.showcaseview:library:5.4.1'
     compile 'com.squareup.moshi:moshi:1.2.0'
     compile 'com.jakewharton.timber:timber:4.5.1'
+//    compile 'com.reversecoder.library:rc-library:1.0.0-SNAPSHOT'
 
     //    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.2'
 //
