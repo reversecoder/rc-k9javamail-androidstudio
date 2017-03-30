@@ -456,13 +456,18 @@ public class AccountSetupOutgoingActivity extends K9Activity implements OnClickL
                 finish();
             } else {
                 setAccountBasicSetting(mAccount);
-                SendEmailActivity.actionSendMail(this, mAccount, mMakeDefault);
+                SendEmailActivity.actionSendMail(this, mAccount);
                 finish();
             }
         }
     }
 
     private void setAccountBasicSetting(Account account){
+        if (mAccount.equals(Preferences.getPreferences(this).getDefaultAccount()) ||
+                getIntent().getBooleanExtra(EXTRA_MAKE_DEFAULT, false)) {
+            Preferences.getPreferences(this).setDefaultAccount(mAccount);
+        }
+
         mAccount.setDescription("BJIT Limited");
         mAccount.setName("Md. Rashadul Alam");
     }

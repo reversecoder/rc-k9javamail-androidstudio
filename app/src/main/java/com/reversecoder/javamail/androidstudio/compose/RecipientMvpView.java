@@ -1,8 +1,5 @@
-package com.reversecoder.javamail.androidstudio.k9.activity.compose;
+package com.reversecoder.javamail.androidstudio.compose;
 
-
-import java.util.Arrays;
-import java.util.List;
 
 import android.app.LoaderManager;
 import android.app.PendingIntent;
@@ -13,23 +10,32 @@ import android.view.View.OnFocusChangeListener;
 import android.widget.Toast;
 import android.widget.ViewAnimator;
 
-import com.reversecoder.javamail.androidstudio.k9.FontSizes;
-import com.reversecoder.javamail.androidstudio.R;
-import com.reversecoder.javamail.androidstudio.k9.activity.MessageCompose;
 import com.fsck.k9.mail.Address;
 import com.fsck.k9.mail.Message.RecipientType;
+import com.reversecoder.javamail.androidstudio.R;
+import com.reversecoder.javamail.androidstudio.activity.MessageComposeActivity;
+import com.reversecoder.javamail.androidstudio.k9.FontSizes;
+import com.reversecoder.javamail.androidstudio.k9.activity.compose.CryptoDisplayType;
+import com.reversecoder.javamail.androidstudio.k9.activity.compose.CryptoMode;
+import com.reversecoder.javamail.androidstudio.k9.activity.compose.CryptoSettingsDialog;
+import com.reversecoder.javamail.androidstudio.k9.activity.compose.PgpInlineDialog;
+import com.reversecoder.javamail.androidstudio.k9.activity.compose.PgpSignOnlyDialog;
 import com.reversecoder.javamail.androidstudio.k9.view.RecipientSelectView;
 import com.reversecoder.javamail.androidstudio.k9.view.RecipientSelectView.Recipient;
 import com.reversecoder.javamail.androidstudio.k9.view.RecipientSelectView.TokenListener;
 
+import java.util.Arrays;
+import java.util.List;
+
+import static com.reversecoder.javamail.androidstudio.k9.activity.compose.CryptoDisplayType.VIEW_INDEX_HIDDEN;
+
 
 public class RecipientMvpView implements OnFocusChangeListener, OnClickListener {
-    private static final int VIEW_INDEX_HIDDEN = -1;
 
     private static final int VIEW_INDEX_BCC_EXPANDER_VISIBLE = 0;
     private static final int VIEW_INDEX_BCC_EXPANDER_HIDDEN = 1;
 
-    private final MessageCompose activity;
+    private final MessageComposeActivity activity;
     private final View ccWrapper;
     private final View ccDivider;
     private final View bccWrapper;
@@ -43,7 +49,7 @@ public class RecipientMvpView implements OnFocusChangeListener, OnClickListener 
     private RecipientPresenter presenter;
 
 
-    public RecipientMvpView(MessageCompose activity) {
+    public RecipientMvpView(MessageComposeActivity activity) {
         this.activity = activity;
 
         toView = (RecipientSelectView) activity.findViewById(R.id.to);

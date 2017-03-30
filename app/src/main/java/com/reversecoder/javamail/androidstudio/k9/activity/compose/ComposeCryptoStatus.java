@@ -4,10 +4,6 @@ package com.reversecoder.javamail.androidstudio.k9.activity.compose;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.reversecoder.javamail.androidstudio.k9.activity.compose.RecipientMvpView.CryptoSpecialModeDisplayType;
-import com.reversecoder.javamail.androidstudio.k9.activity.compose.RecipientMvpView.CryptoStatusDisplayType;
-import com.reversecoder.javamail.androidstudio.k9.activity.compose.RecipientPresenter.CryptoMode;
-import com.reversecoder.javamail.androidstudio.k9.activity.compose.RecipientPresenter.CryptoProviderState;
 import com.reversecoder.javamail.androidstudio.k9.view.RecipientSelectView.Recipient;
 import com.reversecoder.javamail.androidstudio.k9.view.RecipientSelectView.RecipientCryptoStatus;
 
@@ -44,15 +40,15 @@ public class ComposeCryptoStatus {
         return signingKeyId;
     }
 
-    CryptoStatusDisplayType getCryptoStatusDisplayType() {
+    public CryptoDisplayType.CryptoStatusDisplayType getCryptoStatusDisplayType() {
         switch (cryptoProviderState) {
             case UNCONFIGURED:
-                return CryptoStatusDisplayType.UNCONFIGURED;
+                return CryptoDisplayType.CryptoStatusDisplayType.UNCONFIGURED;
             case UNINITIALIZED:
-                return CryptoStatusDisplayType.UNINITIALIZED;
+                return CryptoDisplayType.CryptoStatusDisplayType.UNINITIALIZED;
             case LOST_CONNECTION:
             case ERROR:
-                return CryptoStatusDisplayType.ERROR;
+                return CryptoDisplayType.CryptoStatusDisplayType.ERROR;
             case OK:
                 // provider status is ok -> return value is based on cryptoMode
                 break;
@@ -63,49 +59,49 @@ public class ComposeCryptoStatus {
         switch (cryptoMode) {
             case PRIVATE:
                 if (!hasRecipients) {
-                    return CryptoStatusDisplayType.PRIVATE_EMPTY;
+                    return CryptoDisplayType.CryptoStatusDisplayType.PRIVATE_EMPTY;
                 } else if (allKeysAvailable && allKeysVerified) {
-                    return CryptoStatusDisplayType.PRIVATE_TRUSTED;
+                    return CryptoDisplayType.CryptoStatusDisplayType.PRIVATE_TRUSTED;
                 } else if (allKeysAvailable) {
-                    return CryptoStatusDisplayType.PRIVATE_UNTRUSTED;
+                    return CryptoDisplayType.CryptoStatusDisplayType.PRIVATE_UNTRUSTED;
                 }
-                return CryptoStatusDisplayType.PRIVATE_NOKEY;
+                return CryptoDisplayType.CryptoStatusDisplayType.PRIVATE_NOKEY;
             case OPPORTUNISTIC:
                 if (!hasRecipients) {
-                    return CryptoStatusDisplayType.OPPORTUNISTIC_EMPTY;
+                    return CryptoDisplayType.CryptoStatusDisplayType.OPPORTUNISTIC_EMPTY;
                 } else if (allKeysAvailable && allKeysVerified) {
-                    return CryptoStatusDisplayType.OPPORTUNISTIC_TRUSTED;
+                    return CryptoDisplayType.CryptoStatusDisplayType.OPPORTUNISTIC_TRUSTED;
                 } else if (allKeysAvailable) {
-                    return CryptoStatusDisplayType.OPPORTUNISTIC_UNTRUSTED;
+                    return CryptoDisplayType.CryptoStatusDisplayType.OPPORTUNISTIC_UNTRUSTED;
                 }
-                return CryptoStatusDisplayType.OPPORTUNISTIC_NOKEY;
+                return CryptoDisplayType.CryptoStatusDisplayType.OPPORTUNISTIC_NOKEY;
             case SIGN_ONLY:
-                return CryptoStatusDisplayType.SIGN_ONLY;
+                return CryptoDisplayType.CryptoStatusDisplayType.SIGN_ONLY;
             case DISABLE:
-                return CryptoStatusDisplayType.DISABLED;
+                return CryptoDisplayType.CryptoStatusDisplayType.DISABLED;
             default:
                 throw new AssertionError("all CryptoModes must be handled!");
         }
     }
 
-    CryptoSpecialModeDisplayType getCryptoSpecialModeDisplayType() {
+    public CryptoDisplayType.CryptoSpecialModeDisplayType getCryptoSpecialModeDisplayType() {
         if (cryptoProviderState != CryptoProviderState.OK) {
-            return CryptoSpecialModeDisplayType.NONE;
+            return CryptoDisplayType.CryptoSpecialModeDisplayType.NONE;
         }
 
         if (isSignOnly() && isPgpInlineModeEnabled()) {
-            return CryptoSpecialModeDisplayType.SIGN_ONLY_PGP_INLINE;
+            return CryptoDisplayType.CryptoSpecialModeDisplayType.SIGN_ONLY_PGP_INLINE;
         }
 
         if (isSignOnly()) {
-            return CryptoSpecialModeDisplayType.SIGN_ONLY;
+            return CryptoDisplayType.CryptoSpecialModeDisplayType.SIGN_ONLY;
         }
 
         if (isPgpInlineModeEnabled()) {
-            return CryptoSpecialModeDisplayType.PGP_INLINE;
+            return CryptoDisplayType.CryptoSpecialModeDisplayType.PGP_INLINE;
         }
 
-        return CryptoSpecialModeDisplayType.NONE;
+        return CryptoDisplayType.CryptoSpecialModeDisplayType.NONE;
     }
 
     public boolean shouldUsePgpMessageBuilder() {
@@ -244,11 +240,11 @@ public class ComposeCryptoStatus {
         return null;
     }
 
-    enum AttachErrorState {
+    public enum AttachErrorState {
         IS_INLINE
     }
 
-    AttachErrorState getAttachErrorStateOrNull() {
+    public AttachErrorState getAttachErrorStateOrNull() {
         if (cryptoProviderState == CryptoProviderState.UNCONFIGURED) {
             return null;
         }

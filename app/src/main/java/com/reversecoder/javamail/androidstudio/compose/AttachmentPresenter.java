@@ -1,8 +1,5 @@
-package com.reversecoder.javamail.androidstudio.k9.activity.compose;
+package com.reversecoder.javamail.androidstudio.compose;
 
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -16,13 +13,19 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 
+import com.reversecoder.javamail.androidstudio.k9.activity.compose.AttachmentMvpView;
+import com.reversecoder.javamail.androidstudio.k9.activity.compose.AttachmentsChangedListener;
 import com.reversecoder.javamail.androidstudio.k9.activity.compose.ComposeCryptoStatus.AttachErrorState;
+import com.reversecoder.javamail.androidstudio.k9.activity.compose.WaitingAction;
 import com.reversecoder.javamail.androidstudio.k9.activity.loader.AttachmentContentLoader;
 import com.reversecoder.javamail.androidstudio.k9.activity.loader.AttachmentInfoLoader;
 import com.reversecoder.javamail.androidstudio.k9.activity.misc.Attachment;
 import com.reversecoder.javamail.androidstudio.k9.activity.misc.Attachment.LoadingState;
 import com.reversecoder.javamail.androidstudio.k9.mailstore.AttachmentViewInfo;
 import com.reversecoder.javamail.androidstudio.k9.mailstore.MessageViewInfo;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 
 public class AttachmentPresenter {
@@ -265,7 +268,7 @@ public class AttachmentPresenter {
                         return;
                     }
 
-                    if (attachment.state == Attachment.LoadingState.COMPLETE) {
+                    if (attachment.state == LoadingState.COMPLETE) {
                         attachmentMvpView.updateAttachmentView(attachment);
                         attachments.put(attachment.uri, attachment);
                     } else {
@@ -358,6 +361,4 @@ public class AttachmentPresenter {
         }
         addAttachmentsFromResultIntent(data);
     }
-
-
 }

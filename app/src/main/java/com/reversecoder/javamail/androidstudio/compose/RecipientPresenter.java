@@ -1,10 +1,5 @@
-package com.reversecoder.javamail.androidstudio.k9.activity.compose;
+package com.reversecoder.javamail.androidstudio.compose;
 
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 import android.app.Activity;
 import android.app.LoaderManager;
@@ -17,32 +12,43 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
-import timber.log.Timber;
 import android.view.Menu;
 
-import com.reversecoder.javamail.androidstudio.k9.Account;
-import com.reversecoder.javamail.androidstudio.k9.Identity;
-import com.reversecoder.javamail.androidstudio.k9.K9;
-import com.reversecoder.javamail.androidstudio.R;
-import com.reversecoder.javamail.androidstudio.k9.activity.compose.ComposeCryptoStatus.AttachErrorState;
-import com.reversecoder.javamail.androidstudio.k9.activity.compose.ComposeCryptoStatus.ComposeCryptoStatusBuilder;
-import com.reversecoder.javamail.androidstudio.k9.activity.compose.ComposeCryptoStatus.SendErrorState;
-import com.reversecoder.javamail.androidstudio.k9.helper.Contacts;
-import com.reversecoder.javamail.androidstudio.k9.helper.MailTo;
-import com.reversecoder.javamail.androidstudio.k9.helper.ReplyToParser;
-import com.reversecoder.javamail.androidstudio.k9.helper.ReplyToParser.ReplyToAddresses;
 import com.fsck.k9.mail.Address;
 import com.fsck.k9.mail.Flag;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.Message.RecipientType;
+import com.reversecoder.javamail.androidstudio.R;
+import com.reversecoder.javamail.androidstudio.k9.Account;
+import com.reversecoder.javamail.androidstudio.k9.Identity;
+import com.reversecoder.javamail.androidstudio.k9.K9;
+import com.reversecoder.javamail.androidstudio.k9.activity.compose.ComposeCryptoStatus;
+import com.reversecoder.javamail.androidstudio.k9.activity.compose.ComposeCryptoStatus.ComposeCryptoStatusBuilder;
+import com.reversecoder.javamail.androidstudio.k9.activity.compose.ComposeCryptoStatus.SendErrorState;
+import com.reversecoder.javamail.androidstudio.k9.activity.compose.CryptoMode;
+import com.reversecoder.javamail.androidstudio.k9.activity.compose.CryptoProviderState;
+import com.reversecoder.javamail.androidstudio.k9.activity.compose.RecipientLoader;
+import com.reversecoder.javamail.androidstudio.k9.activity.compose.RecipientsChangedListener;
+import com.reversecoder.javamail.androidstudio.k9.helper.Contacts;
+import com.reversecoder.javamail.androidstudio.k9.helper.MailTo;
+import com.reversecoder.javamail.androidstudio.k9.helper.ReplyToParser;
+import com.reversecoder.javamail.androidstudio.k9.helper.ReplyToParser.ReplyToAddresses;
 import com.reversecoder.javamail.androidstudio.k9.message.ComposePgpInlineDecider;
 import com.reversecoder.javamail.androidstudio.k9.message.PgpMessageBuilder;
 import com.reversecoder.javamail.androidstudio.k9.view.RecipientSelectView.Recipient;
+
 import org.openintents.openpgp.IOpenPgpService2;
 import org.openintents.openpgp.util.OpenPgpApi;
 import org.openintents.openpgp.util.OpenPgpApi.PermissionPingCallback;
 import org.openintents.openpgp.util.OpenPgpServiceConnection;
 import org.openintents.openpgp.util.OpenPgpServiceConnection.OnBound;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import timber.log.Timber;
 
 
 public class RecipientPresenter implements PermissionPingCallback {
@@ -64,7 +70,7 @@ public class RecipientPresenter implements PermissionPingCallback {
     private final Context context;
     private final RecipientMvpView recipientMvpView;
     private final ComposePgpInlineDecider composePgpInlineDecider;
-    private final RecipientsChangedListener listener;
+    public final RecipientsChangedListener listener;
     private ReplyToParser replyToParser;
     private Account account;
     private String openPgpProvider;
@@ -83,8 +89,8 @@ public class RecipientPresenter implements PermissionPingCallback {
 
 
     public RecipientPresenter(Context context, LoaderManager loaderManager, RecipientMvpView recipientMvpView,
-            Account account, ComposePgpInlineDecider composePgpInlineDecider, ReplyToParser replyToParser,
-            RecipientsChangedListener recipientsChangedListener) {
+                              Account account, ComposePgpInlineDecider composePgpInlineDecider, ReplyToParser replyToParser,
+                              RecipientsChangedListener recipientsChangedListener) {
         this.recipientMvpView = recipientMvpView;
         this.context = context;
         this.composePgpInlineDecider = composePgpInlineDecider;
@@ -600,7 +606,7 @@ public class RecipientPresenter implements PermissionPingCallback {
         }
     }
 
-    void showPgpAttachError(AttachErrorState attachErrorState) {
+    void showPgpAttachError(ComposeCryptoStatus.AttachErrorState attachErrorState) {
         switch (attachErrorState) {
             case IS_INLINE:
                 recipientMvpView.showErrorInlineAttach();
@@ -786,4 +792,5 @@ public class RecipientPresenter implements PermissionPingCallback {
         this.openPgpServiceConnection = openPgpServiceConnection;
         this.openPgpProvider = cryptoProvider;
     }
+
 }

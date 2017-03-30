@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.VisibleForTesting;
 
+import com.reversecoder.javamail.androidstudio.application.JavaMailApplication;
 import com.reversecoder.javamail.androidstudio.k9.Globals;
 import com.fsck.k9.mail.BoundaryGenerator;
 import com.fsck.k9.mail.MessagingException;
@@ -15,7 +16,7 @@ import com.fsck.k9.mail.internet.MimeMessage;
 public class SimpleMessageBuilder extends MessageBuilder {
 
     public static SimpleMessageBuilder newInstance() {
-        Context context = Globals.getContext();
+        Context context = JavaMailApplication.getGlobalContext();
         MessageIdGenerator messageIdGenerator = MessageIdGenerator.getInstance();
         BoundaryGenerator boundaryGenerator = BoundaryGenerator.getInstance();
         return new SimpleMessageBuilder(context, messageIdGenerator, boundaryGenerator);

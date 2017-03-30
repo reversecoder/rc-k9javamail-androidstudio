@@ -13,7 +13,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 
 import com.reversecoder.javamail.androidstudio.R;
-import com.reversecoder.javamail.androidstudio.k9.activity.compose.RecipientPresenter.CryptoMode;
 import com.reversecoder.javamail.androidstudio.k9.view.CryptoModeSelector;
 import com.reversecoder.javamail.androidstudio.k9.view.CryptoModeSelector.CryptoModeSelectorState;
 import com.reversecoder.javamail.androidstudio.k9.view.CryptoModeSelector.CryptoStatusSelectedListener;

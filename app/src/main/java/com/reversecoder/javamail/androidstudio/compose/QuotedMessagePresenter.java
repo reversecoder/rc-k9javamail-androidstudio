@@ -1,35 +1,35 @@
-package com.reversecoder.javamail.androidstudio.k9.ui.compose;
+package com.reversecoder.javamail.androidstudio.compose;
 
-
-import java.util.Map;
 
 import android.content.res.Resources;
 import android.os.Bundle;
-import timber.log.Timber;
 
-import com.reversecoder.javamail.androidstudio.k9.Account;
-import com.reversecoder.javamail.androidstudio.k9.Account.MessageFormat;
-import com.reversecoder.javamail.androidstudio.k9.Account.QuoteStyle;
-import com.reversecoder.javamail.androidstudio.k9.Action;
-import com.reversecoder.javamail.androidstudio.k9.K9;
-import com.reversecoder.javamail.androidstudio.k9.activity.MessageCompose;
-import com.reversecoder.javamail.androidstudio.k9.message.extractors.BodyTextExtractor;
-import com.reversecoder.javamail.androidstudio.k9.message.html.HtmlConverter;
-import com.reversecoder.javamail.androidstudio.k9.message.quote.HtmlQuoteCreator;
-import com.reversecoder.javamail.androidstudio.k9.message.quote.TextQuoteCreator;
-import com.reversecoder.javamail.androidstudio.k9.message.signature.HtmlSignatureRemover;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Part;
 import com.fsck.k9.mail.internet.MessageExtractor;
 import com.fsck.k9.mail.internet.MimeUtility;
+import com.reversecoder.javamail.androidstudio.activity.MessageComposeActivity;
+import com.reversecoder.javamail.androidstudio.k9.Account;
+import com.reversecoder.javamail.androidstudio.k9.Account.MessageFormat;
+import com.reversecoder.javamail.androidstudio.k9.Account.QuoteStyle;
+import com.reversecoder.javamail.androidstudio.k9.Action;
 import com.reversecoder.javamail.androidstudio.k9.mailstore.AttachmentResolver;
 import com.reversecoder.javamail.androidstudio.k9.mailstore.MessageViewInfo;
 import com.reversecoder.javamail.androidstudio.k9.message.IdentityField;
-import com.reversecoder.javamail.androidstudio.k9.message.quote.InsertableHtmlContent;
 import com.reversecoder.javamail.androidstudio.k9.message.MessageBuilder;
 import com.reversecoder.javamail.androidstudio.k9.message.QuotedTextMode;
 import com.reversecoder.javamail.androidstudio.k9.message.SimpleMessageFormat;
+import com.reversecoder.javamail.androidstudio.k9.message.extractors.BodyTextExtractor;
+import com.reversecoder.javamail.androidstudio.k9.message.html.HtmlConverter;
+import com.reversecoder.javamail.androidstudio.k9.message.quote.HtmlQuoteCreator;
+import com.reversecoder.javamail.androidstudio.k9.message.quote.InsertableHtmlContent;
+import com.reversecoder.javamail.androidstudio.k9.message.quote.TextQuoteCreator;
+import com.reversecoder.javamail.androidstudio.k9.message.signature.HtmlSignatureRemover;
 import com.reversecoder.javamail.androidstudio.k9.message.signature.TextSignatureRemover;
+
+import java.util.Map;
+
+import timber.log.Timber;
 
 
 public class QuotedMessagePresenter {
@@ -42,7 +42,7 @@ public class QuotedMessagePresenter {
 
 
     private final QuotedMessageMvpView view;
-    private final MessageCompose messageCompose;
+    private final MessageComposeActivity messageCompose;
     private final Resources resources;
 
     private QuotedTextMode quotedTextMode;
@@ -56,7 +56,7 @@ public class QuotedMessagePresenter {
 
 
     public QuotedMessagePresenter(
-            MessageCompose messageCompose, QuotedMessageMvpView quotedMessageMvpView, Account account) {
+            MessageComposeActivity messageCompose, QuotedMessageMvpView quotedMessageMvpView, Account account) {
         this.messageCompose = messageCompose;
         this.resources = messageCompose.getResources();
         this.view = quotedMessageMvpView;

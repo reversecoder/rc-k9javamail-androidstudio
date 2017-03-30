@@ -3,6 +3,9 @@
     package="com.reversecoder.javamail.androidstudio">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    <!-- Needed to mark a contact as contacted -->
+    <uses-permission android:name="android.permission.WRITE_CONTACTS"/>
 
     <application
         android:name=".application.JavaMailApplication"
@@ -44,6 +47,34 @@
             android:name="com.reversecoder.javamail.androidstudio.activity.SendEmailActivity"
             android:configChanges="keyboardHidden|orientation|locale"
             android:label="@string/account_setup_check_settings_title"/>
+
+        <activity
+            android:name=".activity.MessageComposeActivity"
+            android:configChanges="locale"
+            android:label="">
+            <intent-filter>
+                <action android:name="android.intent.action.SENDTO"/>
+                <data android:scheme="mailto"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND"/>
+                <data android:mimeType="*/*"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MULTIPLE"/>
+                <data android:mimeType="*/*"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <data android:scheme="mailto"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+            </intent-filter>
+        </activity>
 
     </application>
 

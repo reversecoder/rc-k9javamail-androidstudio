@@ -1,16 +1,8 @@
-package com.reversecoder.javamail.androidstudio.k9.activity;
+package com.reversecoder.javamail.androidstudio.activity;
 
-
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.regex.Pattern;
 
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
-import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.app.PendingIntent;
@@ -29,7 +21,6 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import timber.log.Timber;
 import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
@@ -44,16 +35,32 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fsck.k9.mail.Address;
+import com.fsck.k9.mail.Flag;
+import com.fsck.k9.mail.Message;
+import com.fsck.k9.mail.Message.RecipientType;
+import com.fsck.k9.mail.MessagingException;
+import com.fsck.k9.mail.internet.MimeMessage;
+import com.reversecoder.javamail.androidstudio.R;
+import com.reversecoder.javamail.androidstudio.compose.AttachmentPresenter;
+import com.reversecoder.javamail.androidstudio.compose.QuotedMessageMvpView;
+import com.reversecoder.javamail.androidstudio.compose.QuotedMessagePresenter;
+import com.reversecoder.javamail.androidstudio.compose.RecipientMvpView;
+import com.reversecoder.javamail.androidstudio.compose.RecipientPresenter;
 import com.reversecoder.javamail.androidstudio.k9.Account;
 import com.reversecoder.javamail.androidstudio.k9.Account.MessageFormat;
 import com.reversecoder.javamail.androidstudio.k9.Action;
 import com.reversecoder.javamail.androidstudio.k9.Identity;
 import com.reversecoder.javamail.androidstudio.k9.K9;
 import com.reversecoder.javamail.androidstudio.k9.Preferences;
-import com.reversecoder.javamail.androidstudio.R;
+import com.reversecoder.javamail.androidstudio.k9.activity.Accounts;
+import com.reversecoder.javamail.androidstudio.k9.activity.K9Activity;
+import com.reversecoder.javamail.androidstudio.k9.activity.MessageList;
+import com.reversecoder.javamail.androidstudio.k9.activity.MessageLoaderHelper;
 import com.reversecoder.javamail.androidstudio.k9.activity.MessageLoaderHelper.MessageLoaderCallbacks;
+import com.reversecoder.javamail.androidstudio.k9.activity.MessageReference;
+import com.reversecoder.javamail.androidstudio.k9.activity.UpgradeDatabases;
 import com.reversecoder.javamail.androidstudio.k9.activity.compose.AttachmentMvpView;
-import com.reversecoder.javamail.androidstudio.k9.activity.compose.AttachmentPresenter;
 import com.reversecoder.javamail.androidstudio.k9.activity.compose.AttachmentsChangedListener;
 import com.reversecoder.javamail.androidstudio.k9.activity.compose.ComposeCryptoStatus;
 import com.reversecoder.javamail.androidstudio.k9.activity.compose.ComposeCryptoStatus.SendErrorState;
@@ -63,8 +70,6 @@ import com.reversecoder.javamail.androidstudio.k9.activity.compose.IdentityAdapt
 import com.reversecoder.javamail.androidstudio.k9.activity.compose.IdentityAdapter.IdentityContainer;
 import com.reversecoder.javamail.androidstudio.k9.activity.compose.PgpInlineDialog.OnOpenPgpInlineChangeListener;
 import com.reversecoder.javamail.androidstudio.k9.activity.compose.PgpSignOnlyDialog.OnOpenPgpSignOnlyChangeListener;
-import com.reversecoder.javamail.androidstudio.k9.activity.compose.RecipientMvpView;
-import com.reversecoder.javamail.androidstudio.k9.activity.compose.RecipientPresenter;
 import com.reversecoder.javamail.androidstudio.k9.activity.compose.RecipientsChangedListener;
 import com.reversecoder.javamail.androidstudio.k9.activity.compose.SaveMessageTask;
 import com.reversecoder.javamail.androidstudio.k9.activity.compose.WaitingAction;
@@ -80,12 +85,6 @@ import com.reversecoder.javamail.androidstudio.k9.helper.MailTo;
 import com.reversecoder.javamail.androidstudio.k9.helper.ReplyToParser;
 import com.reversecoder.javamail.androidstudio.k9.helper.SimpleTextWatcher;
 import com.reversecoder.javamail.androidstudio.k9.helper.Utility;
-import com.fsck.k9.mail.Address;
-import com.fsck.k9.mail.Flag;
-import com.fsck.k9.mail.Message;
-import com.fsck.k9.mail.Message.RecipientType;
-import com.fsck.k9.mail.MessagingException;
-import com.fsck.k9.mail.internet.MimeMessage;
 import com.reversecoder.javamail.androidstudio.k9.mailstore.LocalMessage;
 import com.reversecoder.javamail.androidstudio.k9.mailstore.MessageViewInfo;
 import com.reversecoder.javamail.androidstudio.k9.message.ComposePgpInlineDecider;
@@ -98,12 +97,19 @@ import com.reversecoder.javamail.androidstudio.k9.message.SimpleMessageBuilder;
 import com.reversecoder.javamail.androidstudio.k9.message.SimpleMessageFormat;
 import com.reversecoder.javamail.androidstudio.k9.search.LocalSearch;
 import com.reversecoder.javamail.androidstudio.k9.ui.EolConvertingEditText;
-import com.reversecoder.javamail.androidstudio.k9.ui.compose.QuotedMessageMvpView;
-import com.reversecoder.javamail.androidstudio.k9.ui.compose.QuotedMessagePresenter;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.regex.Pattern;
+
+import timber.log.Timber;
 
 
 @SuppressWarnings("deprecation") // TODO get rid of activity dialogs and indeterminate progress bars
-public class MessageCompose extends K9Activity implements OnClickListener,
+public class MessageComposeActivity extends K9Activity implements OnClickListener,
         CancelListener, OnFocusChangeListener, OnCryptoModeChangedListener,
         OnOpenPgpInlineChangeListener, OnOpenPgpSignOnlyChangeListener, MessageBuilder.Callback,
         AttachmentsChangedListener, RecipientsChangedListener {
@@ -214,30 +220,46 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
     private boolean navigateUp;
 
+    /**
+     * Compose a new message using the given account. If account is null the default account
+     * will be used.
+     */
+    public static void actionCompose(Context context, Account account) {
+//        String accountUuid = (account == null) ?
+//                Preferences.getPreferences(context).getDefaultAccount().getUuid() :
+//                account.getUuid();
+
+        Intent i = new Intent(context, MessageComposeActivity.class);
+        i.putExtra(MessageComposeActivity.EXTRA_ACCOUNT, account.getUuid());
+        i.setAction(MessageComposeActivity.ACTION_COMPOSE);
+        context.startActivity(i);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (UpgradeDatabases.actionUpgradeDatabases(this, getIntent())) {
-            finish();
-            return;
-        }
+//        if (UpgradeDatabases.actionUpgradeDatabases(this, getIntent())) {
+//            finish();
+//            return;
+//        }
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
-        if (K9.getK9ComposerThemeSetting() != K9.Theme.USE_GLOBAL) {
-            // theme the whole content according to the theme (except the action bar)
-            ContextThemeWrapper themeContext = new ContextThemeWrapper(this,
-                    K9.getK9ThemeResourceId(K9.getK9ComposerTheme()));
-            @SuppressLint("InflateParams") // this is the top level activity element, it has no root
-            View v = LayoutInflater.from(themeContext).inflate(R.layout.message_compose, null);
-            TypedValue outValue = new TypedValue();
-            // background color needs to be forced
-            themeContext.getTheme().resolveAttribute(R.attr.messageViewBackgroundColor, outValue, true);
-            v.setBackgroundColor(outValue.data);
-            setContentView(v);
-        } else {
-            setContentView(R.layout.message_compose);
-        }
+//        if (K9.getK9ComposerThemeSetting() != K9.Theme.USE_GLOBAL) {
+//            // theme the whole content according to the theme (except the action bar)
+//            ContextThemeWrapper themeContext = new ContextThemeWrapper(this,
+//                    K9.getK9ThemeResourceId(K9.getK9ComposerTheme()));
+//            @SuppressLint("InflateParams") // this is the top level activity element, it has no root
+//            View v = LayoutInflater.from(themeContext).inflate(R.layout.message_compose, null);
+//            TypedValue outValue = new TypedValue();
+//            // background color needs to be forced
+//            themeContext.getTheme().resolveAttribute(R.attr.messageViewBackgroundColor, outValue, true);
+//            v.setBackgroundColor(outValue.data);
+//            setContentView(v);
+//        } else {
+//            setContentView(R.layout.message_compose);
+//        }
+        setContentView(R.layout.message_compose);
 
         initializeActionBar();
 
@@ -253,24 +275,22 @@ public class MessageCompose extends K9Activity implements OnClickListener,
                 relatedMessageReference.getAccountUuid() :
                 intent.getStringExtra(EXTRA_ACCOUNT);
 
-        account = Preferences.getPreferences(this).getAccount(accountUuid);
-
         if (account == null) {
             account = Preferences.getPreferences(this).getDefaultAccount();
         }
 
-        if (account == null) {
-            /*
-             * There are no accounts set up. This should not have happened. Prompt the
-             * user to set up an account as an acceptable bailout.
-             */
-            startActivity(new Intent(this, Accounts.class));
-            changesMadeSinceLastSave = false;
-            finish();
-            return;
-        }
+//        if (account == null) {
+//            /*
+//             * There are no accounts set up. This should not have happened. Prompt the
+//             * user to set up an account as an acceptable bailout.
+//             */
+//            startActivity(new Intent(this, Accounts.class));
+//            changesMadeSinceLastSave = false;
+//            finish();
+//            return;
+//        }
 
-        contacts = Contacts.getInstance(MessageCompose.this);
+        contacts = Contacts.getInstance(MessageComposeActivity.this);
 
         chooseIdentityButton = (TextView) findViewById(R.id.identity);
         chooseIdentityButton.setOnClickListener(this);
@@ -284,6 +304,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
         subjectView = (EditText) findViewById(R.id.subject);
         subjectView.getInputExtras(true).putBoolean("allowEmoji", true);
+        subjectView.setText("Android app email testing!!!");
 
         EolConvertingEditText upperSignature = (EolConvertingEditText) findViewById(R.id.upper_signature);
         EolConvertingEditText lowerSignature = (EolConvertingEditText) findViewById(R.id.lower_signature);
@@ -294,6 +315,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
         messageContentView = (EolConvertingEditText) findViewById(R.id.message_content);
         messageContentView.getInputExtras(true).putBoolean("allowEmoji", true);
+        messageContentView.setText("This is a test mail from android app.");
 
         attachmentsView = (LinearLayout) findViewById(R.id.attachments);
 
@@ -353,6 +375,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
             } else if (ACTION_EDIT_DRAFT.equals(action)) {
                 this.action = Action.EDIT_DRAFT;
             } else {
+
                 // This shouldn't happen
                 Timber.w("MessageCompose was started with an unsupported action");
                 this.action = Action.COMPOSE;
@@ -1065,7 +1088,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     public Dialog onCreateDialog(int id) {
         switch (id) {
             case DIALOG_SAVE_OR_DISCARD_DRAFT_MESSAGE:
-                return new AlertDialog.Builder(this)
+                return new Builder(this)
                         .setTitle(R.string.save_or_discard_draft_message_dlg_title)
                         .setMessage(R.string.save_or_discard_draft_message_instructions_fmt)
                         .setPositiveButton(R.string.save_draft_action, new DialogInterface.OnClickListener() {
@@ -1084,7 +1107,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
                         })
                         .create();
             case DIALOG_CONFIRM_DISCARD_ON_BACK:
-                return new AlertDialog.Builder(this)
+                return new Builder(this)
                         .setTitle(R.string.confirm_discard_draft_message_title)
                         .setMessage(R.string.confirm_discard_draft_message)
                         .setPositiveButton(R.string.cancel_action, new DialogInterface.OnClickListener() {
@@ -1097,7 +1120,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
                             @Override
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 dismissDialog(DIALOG_CONFIRM_DISCARD_ON_BACK);
-                                Toast.makeText(MessageCompose.this,
+                                Toast.makeText(MessageComposeActivity.this,
                                         getString(R.string.message_discarded_toast),
                                         Toast.LENGTH_LONG).show();
                                 onDiscard();
@@ -1109,7 +1132,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
                         (K9.getK9Theme() == K9.Theme.LIGHT) ?
                                 R.style.Theme_K9_Dialog_Light :
                                 R.style.Theme_K9_Dialog_Dark);
-                Builder builder = new AlertDialog.Builder(context);
+                Builder builder = new Builder(context);
                 builder.setTitle(R.string.send_as);
                 final IdentityAdapter adapter = new IdentityAdapter(context);
                 builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
@@ -1122,7 +1145,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
                 return builder.create();
             case DIALOG_CONFIRM_DISCARD: {
-                return new AlertDialog.Builder(this)
+                return new Builder(this)
                         .setTitle(R.string.dialog_confirm_delete_title)
                         .setMessage(R.string.dialog_confirm_delete_message)
                         .setPositiveButton(R.string.dialog_confirm_delete_confirm_button,
@@ -1507,7 +1530,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     @Override
     public void onMessageBuildException(MessagingException me) {
         Timber.e(me, "Error sending message");
-        Toast.makeText(MessageCompose.this,
+        Toast.makeText(MessageComposeActivity.this,
                 getString(R.string.send_failed_reason, me.getLocalizedMessage()), Toast.LENGTH_LONG).show();
         currentMessageBuilder = null;
         setProgressBarIndeterminateVisibility(false);
@@ -1561,7 +1584,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         @Override
         public void onMessageDataLoadFailed() {
             internalMessageHandler.sendEmptyMessage(MSG_PROGRESS_OFF);
-            Toast.makeText(MessageCompose.this, R.string.status_invalid_id_error, Toast.LENGTH_LONG).show();
+            Toast.makeText(MessageComposeActivity.this, R.string.status_invalid_id_error, Toast.LENGTH_LONG).show();
         }
 
         @Override
@@ -1573,7 +1596,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         @Override
         public void onMessageViewInfoLoadFailed(MessageViewInfo messageViewInfo) {
             internalMessageHandler.sendEmptyMessage(MSG_PROGRESS_OFF);
-            Toast.makeText(MessageCompose.this, R.string.status_invalid_id_error, Toast.LENGTH_LONG).show();
+            Toast.makeText(MessageComposeActivity.this, R.string.status_invalid_id_error, Toast.LENGTH_LONG).show();
         }
 
         @Override
@@ -1597,7 +1620,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(MessageCompose.this, R.string.status_invalid_id_error, Toast.LENGTH_LONG).show();
+                    Toast.makeText(MessageComposeActivity.this, R.string.status_invalid_id_error, Toast.LENGTH_LONG).show();
                 }
             });
         }
@@ -1607,7 +1630,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(MessageCompose.this, R.string.status_network_error, Toast.LENGTH_LONG).show();
+                    Toast.makeText(MessageComposeActivity.this, R.string.status_network_error, Toast.LENGTH_LONG).show();
                 }
             });
         }
@@ -1627,7 +1650,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
                 return;
             }
 
-            Account sourceAccount = Preferences.getPreferences(MessageCompose.this)
+            Account sourceAccount = Preferences.getPreferences(MessageComposeActivity.this)
                     .getAccount(relatedMessageReference.getAccountUuid());
             String sourceFolder = relatedMessageReference.getFolderName();
             String sourceMessageUid = relatedMessageReference.getUid();
@@ -1737,17 +1760,17 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
         @Override
         public void performSendAfterChecks() {
-            MessageCompose.this.performSendAfterChecks();
+            MessageComposeActivity.this.performSendAfterChecks();
         }
 
         @Override
         public void performSaveAfterChecks() {
-            MessageCompose.this.performSaveAfterChecks();
+            MessageComposeActivity.this.performSaveAfterChecks();
         }
 
         @Override
         public void showMissingAttachmentsPartialMessageWarning() {
-            Toast.makeText(MessageCompose.this,
+            Toast.makeText(MessageComposeActivity.this,
                     getString(R.string.message_compose_attachments_skipped_toast), Toast.LENGTH_LONG).show();
         }
     };
@@ -1765,13 +1788,13 @@ public class MessageCompose extends K9Activity implements OnClickListener,
                 case MSG_SAVED_DRAFT:
                     draftId = (Long) msg.obj;
                     Toast.makeText(
-                            MessageCompose.this,
+                            MessageComposeActivity.this,
                             getString(R.string.message_saved_toast),
                             Toast.LENGTH_LONG).show();
                     break;
                 case MSG_DISCARDED_DRAFT:
                     Toast.makeText(
-                            MessageCompose.this,
+                            MessageComposeActivity.this,
                             getString(R.string.message_discarded_toast),
                             Toast.LENGTH_LONG).show();
                     break;
