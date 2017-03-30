@@ -275,6 +275,7 @@ public class AccountSetupCheckSettingsActivity extends K9Activity implements OnC
 
                         Log.d("rc-k9javamail","Pressed accept key");
                         acceptCertificate(chain[0]);
+                        Log.d("rc-k9javamail","Passed acceptCertificate");
                     }
                 })
                 .setNegativeButton(
@@ -298,6 +299,11 @@ public class AccountSetupCheckSettingsActivity extends K9Activity implements OnC
     private void acceptCertificate(X509Certificate certificate) {
         Log.d("rc-k9javamail","In acceptCertificate");
         try {
+            /*
+            * Here is getting exception
+            * */
+            Log.d("rc-k9javamail","accept certificate direction: "+mDirection.name());
+            Log.d("rc-k9javamail","accept certificate x509Certificate: "+certificate.toString());
             mAccount.addCertificate(mDirection, certificate);
             Log.d("rc-k9javamail","Certificate added to account");
         } catch (CertificateException e) {
@@ -456,6 +462,8 @@ public class AccountSetupCheckSettingsActivity extends K9Activity implements OnC
                         afe.getMessage() == null ? "" : afe.getMessage());
             } catch (CertificateValidationException cve) {
                 Log.d("rc-k9javamail","In CertificateValidationException");
+                cve.printStackTrace();
+                Log.d("rc-k9javamail","error message:\n"+cve.getMessage());
                 handleCertificateValidationException(cve);
             } catch (Exception e) {
                 Timber.e(e, "Error while testing settings");
@@ -511,7 +519,7 @@ public class AccountSetupCheckSettingsActivity extends K9Activity implements OnC
         private void checkIncoming() throws MessagingException {
             Log.d("rc-k9javamail: ","In checkIncoming");
             Store store = account.getRemoteStore();
-            Log.d("rc-k9javamail: ","Got store");
+            Log.d("rc-k9javamail: ","Passed getting store");
             if (store instanceof WebDavStore) {
                 publishProgress(R.string.account_setup_check_settings_authenticate);
             } else {
@@ -523,6 +531,7 @@ public class AccountSetupCheckSettingsActivity extends K9Activity implements OnC
 
             Log.d("rc-k9javamail: ","Preparing for checkSettings");
             if(store !=null){
+                Log.d("rc-k9javamail: ","Store is exist");
                 store.checkSettings();
                 Log.d("rc-k9javamail: ","Passed checkSettings from store");
             } else {

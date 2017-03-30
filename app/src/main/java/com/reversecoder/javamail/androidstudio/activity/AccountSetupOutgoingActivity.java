@@ -32,7 +32,6 @@ import com.reversecoder.javamail.androidstudio.k9.CheckDirection;
 import com.reversecoder.javamail.androidstudio.k9.Preferences;
 import com.reversecoder.javamail.androidstudio.k9.account.AccountCreator;
 import com.reversecoder.javamail.androidstudio.k9.activity.K9Activity;
-import com.reversecoder.javamail.androidstudio.k9.activity.setup.AccountSetupOptions;
 import com.reversecoder.javamail.androidstudio.k9.activity.setup.AuthTypeAdapter;
 import com.reversecoder.javamail.androidstudio.k9.activity.setup.AuthTypeHolder;
 import com.reversecoder.javamail.androidstudio.k9.activity.setup.ConnectionSecurityAdapter;
@@ -195,6 +194,7 @@ public class AccountSetupOutgoingActivity extends K9Activity implements OnClickL
             }
 
             if (settings.host != null) {
+                settings.host = "bd1.bjitgroup.com";
                 mServerView.setText(settings.host);
             }
 
@@ -455,10 +455,16 @@ public class AccountSetupOutgoingActivity extends K9Activity implements OnClickL
                 mAccount.save(Preferences.getPreferences(this));
                 finish();
             } else {
-                AccountSetupOptions.actionOptions(this, mAccount, mMakeDefault);
+                setAccountBasicSetting(mAccount);
+                SendEmailActivity.actionSendMail(this, mAccount, mMakeDefault);
                 finish();
             }
         }
+    }
+
+    private void setAccountBasicSetting(Account account){
+        mAccount.setDescription("BJIT Limited");
+        mAccount.setName("Md. Rashadul Alam");
     }
 
     protected void onNext() {

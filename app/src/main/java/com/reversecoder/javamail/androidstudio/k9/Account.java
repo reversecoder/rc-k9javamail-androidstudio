@@ -22,6 +22,7 @@ import android.net.Uri;
 import timber.log.Timber;
 
 import com.reversecoder.javamail.androidstudio.R;
+import com.reversecoder.javamail.androidstudio.application.JavaMailApplication;
 import com.reversecoder.javamail.androidstudio.k9.helper.Utility;
 import com.fsck.k9.mail.Address;
 import com.fsck.k9.mail.MessagingException;
@@ -378,7 +379,7 @@ public class Account implements BaseAccount, StoreConfig {
         Storage storage = preferences.getStorage();
 
         mStoreUri = Base64.decode(storage.getString(mUuid + ".storeUri", null));
-        mLocalStorageProviderId = storage.getString(mUuid + ".localStorageProvider", StorageManager.getInstance(K9.app).getDefaultProviderId());
+        mLocalStorageProviderId = storage.getString(mUuid + ".localStorageProvider", StorageManager.getInstance(JavaMailApplication.getGlobalContext()).getDefaultProviderId());
         mTransportUri = Base64.decode(storage.getString(mUuid + ".transportUri", null));
         mDescription = storage.getString(mUuid + ".description", null);
         mAlwaysBcc = storage.getString(mUuid + ".alwaysBcc", mAlwaysBcc);
@@ -1264,11 +1265,11 @@ public class Account implements BaseAccount, StoreConfig {
     }
 
     public LocalStore getLocalStore() throws MessagingException {
-        return LocalStore.getInstance(this, K9.app);
+        return LocalStore.getInstance(this, JavaMailApplication.getGlobalContext());
     }
 
     public Store getRemoteStore() throws MessagingException {
-        return RemoteStore.getInstance(K9.app, this);
+        return RemoteStore.getInstance(JavaMailApplication.getGlobalContext(), this);
     }
 
     // It'd be great if this actually went into the store implementation

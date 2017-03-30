@@ -249,6 +249,7 @@ public class AccountSetupBasicActivity extends AppCompatActivity {
     private void onNext() {
         mProvider = findProviderForDomain(getDomainFromEmailAddress(mEmailView.getText().toString()));
         if (mProvider == null) {
+            Log.d("rc-k9javamail","Didn't find provider");
             /*
              * We don't have default settings for this account, start the manual
              * setup process.
@@ -256,15 +257,18 @@ public class AccountSetupBasicActivity extends AppCompatActivity {
             onManualSetup();
             return;
         }
-
+        Log.d("rc-k9javamail","Provider found");
         if (mProvider.note != null) {
+            Log.d("rc-k9javamail","Provider note found");
             showDialog(DIALOG_NOTE);
         } else {
+            Log.d("rc-k9javamail","Provider note doesn't found");
             finishAutoSetup();
         }
     }
 
     private void finishAutoSetup() {
+        Log.d("rc-k9javamail","In finishAutoSetup");
         String email = mEmailView.getText().toString();
         String password = mPasswordView.getText().toString();
         String[] emailParts = splitEmail(email);
@@ -343,6 +347,7 @@ public class AccountSetupBasicActivity extends AppCompatActivity {
     }
 
     private void onManualSetup() {
+        Log.d("rc-k9javamail","In onManualSetup");
         String email = mEmailView.getText().toString();
         String[] emailParts = splitEmail(email);
         String user = email;

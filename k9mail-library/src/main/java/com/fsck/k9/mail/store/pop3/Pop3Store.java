@@ -263,7 +263,9 @@ public class Pop3Store extends RemoteStore {
     public void checkSettings() throws MessagingException {
         Pop3Folder folder = new Pop3Folder(mStoreConfig.getInboxFolderName());
         try {
+            Log.d("rc-k9javamail: ","In checkSettings implementation");
             folder.open(Folder.OPEN_MODE_RW);
+            Log.d("rc-k9javamail: ","Folder opened");
             if (!mCapabilities.uidl) {
             /*
              * Run an additional test to see if UIDL is supported on the server. If it's not we
@@ -274,7 +276,8 @@ public class Pop3Store extends RemoteStore {
              * If the server doesn't support UIDL it will return a - response, which causes
              * executeSimpleCommand to throw a MessagingException, exiting this method.
              */
-                folder.executeSimpleCommand(UIDL_COMMAND);
+                String respn = folder.executeSimpleCommand(UIDL_COMMAND);
+                Log.d("rc-k9javamail: ","UIDL suppert command response:\n"+respn);
 
             }
         }
