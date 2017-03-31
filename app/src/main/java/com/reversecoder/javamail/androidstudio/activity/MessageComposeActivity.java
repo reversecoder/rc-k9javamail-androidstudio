@@ -21,6 +21,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
@@ -36,12 +37,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fsck.k9.mail.Address;
+import com.fsck.k9.mail.FetchProfile;
 import com.fsck.k9.mail.Flag;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.Message.RecipientType;
 import com.fsck.k9.mail.MessagingException;
+import com.fsck.k9.mail.Transport;
+import com.fsck.k9.mail.TransportProvider;
 import com.fsck.k9.mail.internet.MimeMessage;
 import com.reversecoder.javamail.androidstudio.R;
+import com.reversecoder.javamail.androidstudio.application.JavaMailApplication;
 import com.reversecoder.javamail.androidstudio.compose.AttachmentPresenter;
 import com.reversecoder.javamail.androidstudio.compose.QuotedMessageMvpView;
 import com.reversecoder.javamail.androidstudio.compose.QuotedMessagePresenter;
@@ -362,10 +367,14 @@ public class MessageComposeActivity extends K9Activity implements OnClickListene
         if (initFromIntent(intent)) {
             action = Action.COMPOSE;
             changesMadeSinceLastSave = true;
+
+            Log.d("rc-k9javamail: ", this.action.name());
         } else {
             String action = intent.getAction();
             if (ACTION_COMPOSE.equals(action)) {
                 this.action = Action.COMPOSE;
+
+                Log.d("rc-k9javamail: ", "action name from compose: "+this.action.name());
             } else if (ACTION_REPLY.equals(action)) {
                 this.action = Action.REPLY;
             } else if (ACTION_REPLY_ALL.equals(action)) {
@@ -379,11 +388,14 @@ public class MessageComposeActivity extends K9Activity implements OnClickListene
                 // This shouldn't happen
                 Timber.w("MessageCompose was started with an unsupported action");
                 this.action = Action.COMPOSE;
+
+                Log.d("rc-k9javamail: ", "action name from else default: "+this.action.name());
             }
         }
 
         if (identity == null) {
             identity = account.getIdentity(0);
+            Log.d("rc-k9javamail: ", "got identity"+identity.getName());
         }
 
         if (account.isSignatureBeforeQuotedText()) {
@@ -459,6 +471,10 @@ public class MessageComposeActivity extends K9Activity implements OnClickListene
         if (currentMessageBuilder != null) {
             setProgressBarIndeterminateVisibility(true);
             currentMessageBuilder.reattachCallback(this);
+        }
+
+        if(currentMessageBuilder==null){
+            Log.d("rc-k9javamail: ", "currentMessageBuilder is null");
         }
     }
 
@@ -694,6 +710,8 @@ public class MessageComposeActivity extends K9Activity implements OnClickListene
 
         quotedMessagePresenter.builderSetProperties(builder);
 
+        Log.d("rc-k9javamail:","message build successfully");
+
         return builder;
     }
 
@@ -755,6 +773,7 @@ public class MessageComposeActivity extends K9Activity implements OnClickListene
         if (currentMessageBuilder != null) {
             changesMadeSinceLastSave = false;
             setProgressBarIndeterminateVisibility(true);
+            Log.d("rc-k9javamail:","Preparing for buildAsync");
             currentMessageBuilder.buildAsync(this);
         }
     }
@@ -1391,33 +1410,65 @@ public class MessageComposeActivity extends K9Activity implements OnClickListene
             this.message = message;
             this.draftId = draftId;
             this.messageReference = messageReference;
+            Log.d("rc-k9javamail: ","In SendMessageTask");
         }
 
         @Override
         protected Void doInBackground(Void... params) {
             try {
+
+                Log.d("rc-k9javamail: ","In SendMessageTask doInBackground");
                 contacts.markAsContacted(message.getRecipients(RecipientType.TO));
                 contacts.markAsContacted(message.getRecipients(RecipientType.CC));
                 contacts.markAsContacted(message.getRecipients(RecipientType.BCC));
                 updateReferencedMessage();
+
+                Log.d("rc-k9javamail: ","Passed updateReferencedMessage()");
+                Log.d("rc-k9javamail: ","Starting sendMessage()");
+                sendMessage(account);
+                Log.d("rc-k9javamail: ","Passed sendMessage()");
             } catch (Exception e) {
                 Timber.e(e, "Failed to mark contact as contacted.");
             }
 
-            MessagingController.getInstance(context).sendMessage(account, message, null);
-            if (draftId != null) {
-                // TODO set draft id to invalid in MessageCompose!
-                MessagingController.getInstance(context).deleteDraft(account, draftId);
-            }
+//            Log.d("rc-k9javamail: ","Starting sendMessage()");
+//            MessagingController.getInstance(context).sendMessage(account, message, null);
+
+//            Log.d("rc-k9javamail: ","Passed sendMessage()");
+//            if (draftId != null) {
+//                Log.d("rc-k9javamail: ","Draft is found");
+//                // TODO set draft id to invalid in MessageCompose!
+//                MessagingController.getInstance(context).deleteDraft(account, draftId);
+//
+//            }
 
             return null;
         }
+
+
+        private void sendMessage(Account account) throws Exception{
+            FetchProfile fp = new FetchProfile();
+            fp.add(FetchProfile.Item.ENVELOPE);
+            fp.add(FetchProfile.Item.BODY);
+            TransportProvider transportProvider = TransportProvider.getInstance();
+            Transport transport = transportProvider.getTransport(JavaMailApplication.getGlobalContext(), account);
+
+            message.setFlag(Flag.X_SEND_IN_PROGRESS, true);
+
+            Timber.i("Sending message with UID %s", message.getUid());
+            transport.sendMessage(message);
+
+            message.setFlag(Flag.X_SEND_IN_PROGRESS, false);
+            message.setFlag(Flag.SEEN, true);
+        }
+
 
         /**
          * Set the flag on the referenced message(indicated we replied / forwarded the message)
          **/
         private void updateReferencedMessage() {
             if (messageReference != null && messageReference.getFlag() != null) {
+                Log.d("rc-k9javamail: ","In updateReferencedMessage()");
                 Timber.d("Setting referenced message (%s, %s) flag to %s",
                         messageReference.getFolderName(),
                         messageReference.getUid(),
@@ -1509,15 +1560,30 @@ public class MessageComposeActivity extends K9Activity implements OnClickListene
             new SaveMessageTask(getApplicationContext(), account, contacts, internalMessageHandler,
                     message, draftId, saveRemotely).execute();
             if (finishAfterDraftSaved) {
-                finish();
+//                finish();
             } else {
                 setProgressBarIndeterminateVisibility(false);
             }
         } else {
             currentMessageBuilder = null;
-            new SendMessageTask(getApplicationContext(), account, contacts, message,
+            if(account==null){
+                Log.d("rc-k9javamail: ","account is null");
+            }
+            if(contacts==null){
+                Log.d("rc-k9javamail: ","contacts is null");
+            }
+            if(message==null){
+                Log.d("rc-k9javamail: ","message is null");
+            }
+            if(draftId==0){
+                Log.d("rc-k9javamail: ","draftId is null");
+            }
+            if(relatedMessageReference==null){
+                Log.d("rc-k9javamail: ","relatedMessageReference is null");
+            }
+            new SendMessageTask(JavaMailApplication.getGlobalContext(), account, contacts, message,
                     draftId != INVALID_DRAFT_ID ? draftId : null, relatedMessageReference).execute();
-            finish();
+//            finish();
         }
     }
 

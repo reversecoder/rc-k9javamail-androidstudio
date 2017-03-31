@@ -10,14 +10,15 @@ import com.reversecoder.javamail.androidstudio.R;
 import com.reversecoder.javamail.androidstudio.k9.Account;
 import com.reversecoder.javamail.androidstudio.k9.Preferences;
 import com.reversecoder.javamail.androidstudio.k9.activity.K9Activity;
+import com.reversecoder.javamail.androidstudio.k9.activity.MessageCompose;
+
+import static com.reversecoder.javamail.androidstudio.activity.MessageComposeActivity.EXTRA_ACCOUNT;
 
 /**
  * Created by rashed on 3/30/17.
  */
 
 public class SendEmailActivity extends K9Activity {
-
-    private static final String EXTRA_ACCOUNT = "account";
 
     private Account mAccount;
 
@@ -41,6 +42,7 @@ public class SendEmailActivity extends K9Activity {
     public static void actionSendMail(Context context, Account account) {
         Intent i = new Intent(context, SendEmailActivity.class);
         i.putExtra(EXTRA_ACCOUNT, account.getUuid());
+        i.setAction(MessageCompose.ACTION_COMPOSE);
         context.startActivity(i);
     }
 

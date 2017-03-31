@@ -42,6 +42,7 @@ import android.os.Process;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
+import android.util.Log;
 
 import com.reversecoder.javamail.androidstudio.k9.Account;
 import com.reversecoder.javamail.androidstudio.k9.Account.DeletePolicy;
@@ -2584,15 +2585,24 @@ public class MessagingController {
             final Message message,
             MessagingListener listener) {
         try {
+            Log.d("rc-k9javamail: ","In sendMessage()");
             LocalStore localStore = account.getLocalStore();
+            Log.d("rc-k9javamail: ","local store size is: "+localStore.getSize());
             LocalFolder localFolder = localStore.getFolder(account.getOutboxFolderName());
+            Log.d("rc-k9javamail: ","got local folder: "+localFolder.getName());
             localFolder.open(Folder.OPEN_MODE_RW);
+            Log.d("rc-k9javamail: ","local folder opened");
             localFolder.appendMessages(Collections.singletonList(message));
+            Log.d("rc-k9javamail: ","appened message in local folder");
             Message localMessage = localFolder.getMessage(message.getUid());
+            Log.d("rc-k9javamail: ","picked message from local folder");
             localMessage.setFlag(Flag.X_DOWNLOADED_FULL, true);
+            Log.d("rc-k9javamail: ","set flag for local message");
             localFolder.close();
+            Log.d("rc-k9javamail: ","Starting sendPendingMessages()");
             sendPendingMessages(account, listener);
         } catch (Exception e) {
+            Log.d("rc-k9javamail: ","In send message excepiton");
             /*
             for (MessagingListener l : getListeners())
             {
@@ -2618,17 +2628,20 @@ public class MessagingController {
      */
     public void sendPendingMessages(final Account account,
             MessagingListener listener) {
+        Log.d("rc-k9javamail: ","In sendPendingMessages()");
         putBackground("sendPendingMessages", listener, new Runnable() {
             @Override
             public void run() {
                 if (!account.isAvailable(context)) {
                     throw new UnavailableAccountException();
                 }
+                Log.d("rc-k9javamail: ","Starting messagesPendingSend()");
                 if (messagesPendingSend(account)) {
-
+                    Log.d("rc-k9javamail: ","Starting showSendingNotificationIfNecessary()");
                     showSendingNotificationIfNecessary(account);
-
+                    Log.d("rc-k9javamail: ","Passed showSendingNotificationIfNecessary()");
                     try {
+                        Log.d("rc-k9javamail: ","Starting sendPendingMessagesSynchronous()");
                         sendPendingMessagesSynchronous(account);
                     } finally {
                         clearSendingNotificationIfNecessary(account);
@@ -2653,15 +2666,18 @@ public class MessagingController {
     private boolean messagesPendingSend(final Account account) {
         Folder localFolder = null;
         try {
+            Log.d("rc-k9javamail: ","Starting messagesPendingSend()");
             localFolder = account.getLocalStore().getFolder(
                     account.getOutboxFolderName());
             if (!localFolder.exists()) {
+                Log.d("rc-k9javamail: ","local folder is not exist");
                 return false;
             }
 
             localFolder.open(Folder.OPEN_MODE_RW);
-
+            Log.d("rc-k9javamail: ","Local folder opened");
             if (localFolder.getMessageCount() > 0) {
+                Log.d("rc-k9javamail: ","Local folder message is found");
                 return true;
             }
         } catch (Exception e) {
@@ -2677,6 +2693,7 @@ public class MessagingController {
      */
     @VisibleForTesting
     protected void sendPendingMessagesSynchronous(final Account account) {
+        Log.d("rc-k9javamail: ","In sendPendingMessagesSynchronous()");
         LocalFolder localFolder = null;
         Exception lastFailure = null;
         boolean wasPermanentFailure = false;

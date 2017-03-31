@@ -25,6 +25,7 @@ import com.fsck.k9.mail.TransportProvider;
 import com.fsck.k9.mail.filter.Hex;
 import com.fsck.k9.mail.store.webdav.WebDavStore;
 import com.reversecoder.javamail.androidstudio.R;
+import com.reversecoder.javamail.androidstudio.application.JavaMailApplication;
 import com.reversecoder.javamail.androidstudio.k9.Account;
 import com.reversecoder.javamail.androidstudio.k9.CheckDirection;
 import com.reversecoder.javamail.androidstudio.k9.K9;
@@ -474,7 +475,7 @@ public class AccountSetupCheckSettingsActivity extends K9Activity implements OnC
         }
 
         private void clearCertificateErrorNotifications(CheckDirection direction) {
-            final MessagingController ctrl = MessagingController.getInstance(getApplication());
+            final MessagingController ctrl = MessagingController.getInstance(JavaMailApplication.getGlobalContext());
             ctrl.clearCertificateErrorNotifications(account, direction);
         }
 
